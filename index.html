@@ -1093,6 +1093,8 @@
   }
   .near-find a:hover { border-color: var(--accent); color: var(--accent); }
   .near-foot { margin: 12px 0 10px; color: var(--muted); font-size: var(--step--2); }
+  #app-full { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border: 0; padding: 0; }
+  .app-full-note { color: var(--muted); font-size: var(--step--2); flex: 1 1 220px; }
   [dir="rtl"] .near-dist { text-align: right; }
 
   @media (prefers-reduced-motion: reduce) {
@@ -1129,7 +1131,14 @@
     <div class="eyebrow" data-k="eyebrow">Michal &amp; Nachum · 03–27 November 2026</div>
     <h1 data-k="h1">Japan, twenty-two nights</h1>
     <p class="fullplan" id="full-plan-link" hidden><a href="/full/" data-k="fullplan">Travelling with us? The full plan &mdash; booking numbers, confirmations, the lot &mdash; is behind a Google sign-in.</a></p>
-    <p class="fullplan" id="apk-link" hidden><a href="https://github.com/nachum-shmilovitz-66/japan2026/releases/latest/download/Japan-2026-public.apk" data-k="apklink">On an Android phone? Install it as an app &mdash; the whole plan travels with you, and works with no signal.</a></p>
+    <p class="fullplan" id="app-full" hidden>
+      <button type="button" class="near-btn" id="app-full-btn">
+        <svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M240-80q-33 0-56.5-23.5T160-160v-400q0-33 23.5-56.5T240-640h40v-80q0-83 58.5-141.5T480-920q83 0 141.5 58.5T680-720v80h40q33 0 56.5 23.5T800-560v400q0 33-23.5 56.5T720-80H240Zm240-200q33 0 56.5-23.5T560-360q0-33-23.5-56.5T480-440q-33 0-56.5 23.5T400-360q0 33 23.5 56.5T480-280ZM360-640h240v-80q0-50-35-85t-85-35q-50 0-85 35t-35 85v80Z"/></svg>
+        <span data-k="appfull">Full plan</span>
+      </button>
+      <span class="app-full-note" id="app-full-note" data-k="appfull-note">Booking numbers and confirmations, for the four of us. Sign in once with a code sent to your email; after that it works with no signal.</span>
+    </p>
+    <p class="fullplan" id="apk-link" hidden><a href="https://github.com/nachum-shmilovitz-66/japan2026/releases/latest/download/Japan-2026.apk" data-k="apklink">On an Android phone? Install it as an app &mdash; the whole plan travels with you, and works with no signal.</a></p>
     <section class="near" id="near-panel" hidden>
       <div class="near-head">
         <h2 data-k="near-title">What is near you</h2>
@@ -1439,7 +1448,7 @@
      looking at" has a single answer. Android carries it as versionName and iOS
      as MARKETING_VERSION; both keep a separate build counter that only ever
      rises, because neither platform will install a build that goes backwards. */
-  var VERSION = "1.3.0";
+  var VERSION = "1.4.0";
 
   /* The private build carries every booking reference and its PIN, which together
      are enough to cancel a reservation on Booking.com without logging in. The
@@ -1585,6 +1594,10 @@
     bTotalNote: t("Two people, twenty-four days, shopping excluded",
                   "שני אנשים, עשרים וארבעה ימים, ללא קניות"),
     bAtRate: t("at the rate the confirmations imply", "לפי השער שעולה מהאישורים"),
+    fullCached: t("Kept on this phone \u2014 opens with no signal.",
+                  "\u05e0\u05e9\u05de\u05e8 \u05d1\u05de\u05db\u05e9\u05d9\u05e8 \u2014 \u05e0\u05e4\u05ea\u05d7 \u05d2\u05dd \u05d1\u05dc\u05d9 \u05e7\u05dc\u05d9\u05d8\u05d4."),
+    fullNeedsSignal: t("This needs a signal once. Open it where there is data, and it is yours offline afterwards.",
+                       "\u05e6\u05e8\u05d9\u05da \u05e7\u05dc\u05d9\u05d8\u05d4 \u05e4\u05e2\u05dd \u05d0\u05d7\u05ea. \u05e4\u05ea\u05d7\u05d5 \u05d1\u05de\u05e7\u05d5\u05dd \u05e2\u05dd \u05d2\u05dc\u05d9\u05e9\u05d4, \u05d5\u05de\u05e9\u05dd \u05d5\u05d0\u05d9\u05dc\u05da \u05d6\u05d4 \u05e2\u05d5\u05d1\u05d3 \u05d2\u05dd \u05d1\u05dc\u05d9."),
     nAsking: t("Asking the phone where you are\u2026", "\u05e9\u05d5\u05d0\u05dc \u05d0\u05ea \u05d4\u05d8\u05dc\u05e4\u05d5\u05df \u05d0\u05d9\u05e4\u05d4 \u05d0\u05ea\u05dd\u2026"),
     nDenied: t("The phone would not share your location. Allow it for this page, or open the settings and turn location on for the app.",
                "\u05d4\u05d8\u05dc\u05e4\u05d5\u05df \u05dc\u05d0 \u05e9\u05d9\u05ea\u05e3 \u05d0\u05ea \u05d4\u05de\u05d9\u05e7\u05d5\u05dd. \u05d0\u05e9\u05e8\u05d5 \u05dc\u05d3\u05e3 \u05d4\u05d6\u05d4, \u05d0\u05d5 \u05d4\u05e4\u05e2\u05d9\u05dc\u05d5 \u05de\u05d9\u05e7\u05d5\u05dd \u05dc\u05d0\u05e4\u05dc\u05d9\u05e7\u05e6\u05d9\u05d4 \u05d1\u05d4\u05d2\u05d3\u05e8\u05d5\u05ea."),
@@ -1772,6 +1785,10 @@
     "fullplan": "נוסעים איתנו? התוכנית המלאה — מספרי ההזמנות, האישורים, הכול — נמצאת מאחורי כניסה עם Google.",
     "apklink": "עם אנדרואיד? אפשר להתקין את התוכנית כאפליקציה — הכול נוסע איתכם, ועובד גם בלי קליטה.",
     "nearbtn": "מה קרוב",
+    "appfull": "התוכנית המלאה",
+    "appfull-note": "מספרי הזמנות ואישורים, לארבעתנו. נכנסים פעם אחת עם קוד שנשלח למייל; אחר כך זה עובד גם בלי קליטה.",
+    "appfull-offline": "נשמר במכשיר — נפתח גם בלי קליטה.",
+    "appfull-need": "צריך קליטה פעם אחת כדי להביא את התוכנית המלאה.",
     "near-title": "מה קרוב אליכם",
     "near-foot": "המרחקים בקו אווירי מהמקום שהטלפון מזהה, כך שההליכה ארוכה יותר. הרשימה עובדת בלי קליטה; פתיחת מפה דורשת קליטה.",
     "h2-budget": "כמה יעלו הימים עצמם",
@@ -4203,7 +4220,21 @@
        Inside the two apps the page is a local file, where "/full/" resolves to
        nothing and an offer to install the app is being read inside the app, so
        neither line is shown there. */
-    if (location.protocol !== "file:") {
+    /* Three places this copy can be running, and each wants something else.
+       Ask the shell rather than the address bar: a page saved to disk is also
+       "file:", and it can do neither. */
+    var android = window.AndroidShell && window.AndroidShell.openFull;
+    var ios = window.webkit && window.webkit.messageHandlers &&
+              window.webkit.messageHandlers.full;
+    if (android) {
+      /* Inside the app the full plan is fetched rather than linked: Access
+         decides, and what comes back is kept on the phone. */
+      showAppFull(function () { window.AndroidShell.openFull(); },
+                  !!(window.AndroidShell.hasFull && window.AndroidShell.hasFull()));
+    } else if (ios) {
+      showAppFull(function () { window.webkit.messageHandlers.full.postMessage("open"); },
+                  window.__fullCached === true);
+    } else if (location.protocol !== "file:") {
       ["full-plan-link", "apk-link"].forEach(function (id) {
         var n = document.getElementById(id);
         if (n) n.hidden = false;
@@ -4570,6 +4601,26 @@
   if (window.speechSynthesis && window.speechSynthesis.onvoiceschanged !== undefined) {
     window.speechSynthesis.onvoiceschanged = function () { if (currentGuide) showGuide(currentGuide); };
   }
+
+  /* The button that fetches the full plan, shown only inside the apps. The
+     page cannot reach past the gate itself, so it asks the shell to, and the
+     shell keeps what comes back. */
+  function showAppFull(open, cached) {
+    var wrap = document.getElementById("app-full");
+    if (!wrap) return;
+    wrap.hidden = false;
+    if (cached) {
+      document.getElementById("app-full-note").textContent = tx(UI.fullCached);
+    }
+    document.getElementById("app-full-btn").addEventListener("click", open);
+  }
+
+  /* Called by the shell when there is no connection and nothing stored yet. */
+  window.__fullUnavailable = function () {
+    var note = document.getElementById("app-full-note");
+    if (note) note.textContent = tx(UI.fullNeedsSignal);
+  };
+
 
   /* ---------------- what is near me ----------------
 
