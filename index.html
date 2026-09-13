@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="13" fill="%23FBFCFD"/><circle cx="32" cy="32" r="17" fill="%23BC002D"/></svg>'>
+<meta name="theme-color" content="#BC002D">
 <style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
 <body>
@@ -489,6 +491,10 @@
   }
   .tile-note { font-size: var(--step--1); color: var(--muted); }
   .tile-value.is-urgent { color: var(--urgent); }
+  /* Every other tile holds a number, which is why the tiles are set in the
+     mono face. One holds words, and at that size in that face they wrap
+     into a block three lines deep. */
+  .tile-value.is-words { font-family: var(--display); font-size: var(--step-1); font-variant-numeric: normal; }
 
   /* ---------- section heads ---------- */
 
@@ -994,6 +1000,15 @@
   .settled-card { background: var(--surface); padding: 16px 18px; display: flex; flex-direction: column; gap: 9px; }
   .settled-card h3 { margin: 0; font-family: var(--display); font-size: var(--step-1); font-weight: 600; line-height: 1.25; }
 
+  /* The budget table ends in a summed row; it needs to read as a total rather
+     than as one more line of the list. */
+  tr.is-total td { font-weight: 600; border-top: 2px solid var(--rule); }
+
+  .shop-when { font-size: var(--step--1); color: var(--muted); font-family: var(--sans); font-weight: 400; }
+  .shop-item + .shop-item { margin-top: 11px; padding-top: 11px; border-top: 1px solid var(--rule-soft); }
+  .shop-name { font-weight: 600; }
+  .shop-note { font-size: var(--step--1); color: var(--ink-2); margin-top: 1px; }
+
   .table-scroll { overflow-x: auto; border: 1px solid var(--rule); border-radius: 3px; }
   table { border-collapse: collapse; width: 100%; font-size: var(--step--1); background: var(--surface); }
   th, td { padding: 9px 13px; text-align: left; border-bottom: 1px solid var(--rule-soft); white-space: nowrap; }
@@ -1067,7 +1082,7 @@
         <span class="tile-value">975 km</span>
         <span class="tile-note" data-k="tn-wheel">Six driving days, 12–20 Nov</span>
       </div>
-      <div class="tile">
+      <div class="tile" id="tile-deadline">
         <span class="tile-label" data-k="tl-deadline">Next deadline</span>
         <span class="tile-value is-urgent" id="t-deadline">02 Nov</span>
         <span class="tile-note" id="t-deadline-note">Good Nature Kyoto — free cancellation ends</span>
@@ -1128,13 +1143,13 @@
   <section>
     <div class="rail-head">
       <h2 data-k="h2-res">Every reservation</h2>
-      <span class="hint" data-k="hint-res">All seventeen, in route order.</span>
+      <span class="hint" data-k="hint-res">Seventeen places, in route order &mdash; the ones we picked, and would happily recommend.</span>
     </div>
     <div class="table-scroll">
       <table>
         <thead>
           <tr>
-            <th data-k="th-stop">Stop</th><th data-k="th-nights">Nights</th><th data-k="th-hotel">Hotel</th><th>¥</th><th>US$</th><th data-k="th-beds">Beds</th><th data-k="th-bf">Breakfast</th><th data-k="th-free">Free until</th><th data-k="th-conf" id="th-conf">Confirmation</th>
+            <th data-k="th-stop">Stop</th><th data-k="th-nights">Nights</th><th data-k="th-hotel">Hotel</th><th>¥</th><th>US$</th><th data-k="th-beds">Beds</th><th data-k="th-bf">Breakfast</th><th data-k="th-free" id="th-free">Free until</th><th data-k="th-conf" id="th-conf">Confirmation</th>
           </tr>
         </thead>
         <tbody id="ledger"></tbody>
@@ -1142,7 +1157,7 @@
     </div>
   </section>
 
-  <section>
+  <section id="sec-cal">
     <div class="rail-head">
       <h2 data-k="h2-cal">Cancellation calendar</h2>
       <span class="hint" data-k="hint-cal">All cut-offs are 23:59 Japan time. Faded entries are the single bookings, with nothing to decide.</span>
@@ -1150,7 +1165,7 @@
     <ul class="rail" id="rail"></ul>
   </section>
 
-  <section>
+  <section id="sec-dup">
     <div class="rail-head">
       <h2 data-k="h2-dup">Still doubled up</h2>
       <span class="hint" data-k="hint-dup">Six stops are holding two reservations each. Pick one per stop — the choice is remembered in this browser — then cancel the loser through Booking.com before its date.</span>
@@ -1175,6 +1190,52 @@
     </div>
 
     <div class="legs" id="legs"></div>
+  </section>
+
+
+  <section id="sec-budget">
+    <div class="rail-head">
+      <h2 data-k="h2-budget">What the days themselves cost</h2>
+      <span class="hint" data-k="hint-budget">What the two of you spend once you are there &mdash; eating, driving, riding, getting in. Not the beds, not the flights, not the car, and not a yen of shopping.</span>
+    </div>
+
+    <div class="tiles" style="margin-bottom:22px">
+      <div class="tile">
+        <span class="tile-label" data-k="tl-spend">On the ground</span>
+        <span class="tile-value" id="t-spend">&mdash;</span>
+        <span class="tile-note" id="t-spend-note"></span>
+      </div>
+      <div class="tile">
+        <span class="tile-label" data-k="tl-perday">A day, the two of you</span>
+        <span class="tile-value" id="t-perday">&mdash;</span>
+        <span class="tile-note" data-k="tn-perday">Across the twenty-four days, 4 to 27 November</span>
+      </div>
+      <div class="tile">
+        <span class="tile-label" data-k="tl-outside">Left out on purpose</span>
+        <span class="tile-value is-words" data-k="tv-outside">Beds, flights, car</span>
+        <span class="tile-note" data-k="tn-outside">Those are settled above. Shopping is the one line nobody can estimate for you.</span>
+      </div>
+    </div>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th data-k="th-what">What</th><th>&yen;</th><th>US$</th><th data-k="th-basis">How it is reckoned</th>
+          </tr>
+        </thead>
+        <tbody id="budget"></tbody>
+      </table>
+    </div>
+    <p class="footnote" data-k="fn-budget">Yen is the honest column: everything here is paid in yen, and the dollar figure beside it is only the conversion at the rate the hotel confirmations imply. It will move. These are careful estimates, not quotes &mdash; eat at the counter instead of the restaurant and the food line halves; take the expressway everywhere and the toll line grows.</p>
+  </section>
+
+  <section id="sec-shops">
+    <div class="rail-head">
+      <h2 data-k="h2-shops">Where to shop</h2>
+      <span class="hint" data-k="hint-shops">By base, in route order. Spend over &yen;5,000 in one shop and it is tax-free &mdash; but only against the passport itself, not a photograph of it, and only in shops showing the tax-free sign.</span>
+    </div>
+    <div class="settled-grid" id="shops"></div>
   </section>
 
   <section>
@@ -1302,7 +1363,7 @@
      looking at" has a single answer. Android carries it as versionName and iOS
      as MARKETING_VERSION; both keep a separate build counter that only ever
      rises, because neither platform will install a build that goes backwards. */
-  var VERSION = "1.0.0";
+  var VERSION = "1.1.0";
 
   /* The private build carries every booking reference and its PIN, which together
      are enough to cancel a reservation on Booking.com without logging in. The
@@ -1340,6 +1401,13 @@
   var DOW_HE = { Sun: "ראשון", Mon: "שני", Tue: "שלישי", Wed: "רביעי", Thu: "חמישי", Fri: "שישי", Sat: "שבת" };
 
   var UI = {
+    bSlack: t("Room for the unplanned", "מקום לבלתי צפוי"),
+    bSlackNote: t("A tenth on top. Something always costs more than it was supposed to.",
+                  "עשירית נוספת. תמיד משהו עולה יותר ממה שתוכנן."),
+    bTotal: t("Everything above", "הכול יחד"),
+    bTotalNote: t("Two people, twenty-four days, shopping excluded",
+                  "שני אנשים, עשרים וארבעה ימים, ללא קניות"),
+    bAtRate: t("at the rate the confirmations imply", "לפי השער שעולה מהאישורים"),
     langEn: t("English", "אנגלית"),
     langHe: t("Hebrew", "עברית"),
     themeAuto: t("Follow the phone", "לפי הטלפון"),
@@ -1505,7 +1573,20 @@
     "h2-wallet": "מה שנושאים בארנק",
     "hint-wallet": "הטיסות והרכב — השניים שאין להם חלופה.",
     "h2-res": "כל ההזמנות",
-    "hint-res": "כל שבע-עשרה, לפי סדר המסלול.",
+    "hint-res": "שבע-עשרה מקומות, לפי סדר המסלול — אלו שבחרנו, ושנמליץ עליהם בשמחה.",
+    "h2-budget": "כמה יעלו הימים עצמם",
+    "hint-budget": "כמה שניכם מוציאים אחרי שאתם כבר שם — אוכל, נהיגה, נסיעות, כניסות. לא הלינה, לא הטיסות, לא הרכב, ואף לא ין אחד של קניות.",
+    "tl-spend": "בשטח",
+    "tl-perday": "ליום, לשניכם",
+    "tn-perday": "על פני עשרים וארבעה ימים, 4 עד 27 בנובמבר",
+    "tl-outside": "לא נכלל בכוונה",
+    "tv-outside": "לינה, טיסות, רכב",
+    "tn-outside": "אלה סגורים למעלה. קניות הן השורה היחידה שאיש אינו יכול להעריך במקומכם.",
+    "th-what": "מה",
+    "th-basis": "לפי מה חושב",
+    "fn-budget": "הין הוא העמודה הכנה: הכול כאן משולם בין, והדולר לצידו הוא רק ההמרה לפי השער שעולה מאישורי המלונות. הוא יזוז. אלה הערכות זהירות, לא הצעות מחיר — אכלו בדלפק במקום במסעדה ושורת האוכל מתחצה; סעו בכביש המהיר בכל מקום ושורת האגרה תגדל.",
+    "h2-shops": "איפה לקנות",
+    "hint-shops": "לפי בסיס, בסדר המסלול. קנייה מעל 5,000 ין בחנות אחת פטורה ממס — אבל רק מול הדרכון עצמו, לא מול צילום שלו, ורק בחנויות שמציגות את שלט הפטור.",
     "h2-cal": "לוח הביטולים",
     "hint-cal": "כל המועדים הם 23:59 שעון יפן. הרשומות הדהויות הן ההזמנות היחידות, שאין בהן מה להחליט.",
     "h2-dup": "עדיין כפול",
@@ -1587,6 +1668,8 @@
     renderLegs();
     renderRail();
     renderLedger();
+    renderBudget();
+    renderShops();
     applyPicks();
     renderNow();
     refreshStaticMapLinks();
@@ -2973,6 +3056,182 @@
     ]
   };
 
+
+  /* ---------- what the days cost ----------
+
+     Two people, on the ground, for the twenty-four days between landing on the
+     4th and flying home on the 27th. Beds, flights and the car are settled
+     elsewhere on this page and are deliberately not counted again here.
+     Shopping is left out entirely: it is the one line that is a decision
+     rather than a cost.
+
+     Every figure is yen, because every one of them is paid in yen. The dollar
+     column is only the conversion, at the rate the hotel confirmations
+     themselves imply (about 159 yen to the dollar) — it will have moved by
+     November. */
+  var YEN_USD = 159;
+  /* Not TRIP_DAYS: that one is already taken further down, counts something
+     slightly different, and being declared later would quietly win. */
+  var BUDGET_DAYS = 24;
+
+  var BUDGET = [
+    [t("Food and drink", "אוכל ושתייה"), 230000,
+     t("Breakfast comes with most of the bookings. This reckons a ¥1,500 lunch and a ¥3,500 dinner each, on the days you are not already fed.",
+       "ארוחת בוקר כלולה ברוב ההזמנות. החישוב מניח צהריים ב-1,500 ין וערב ב-3,500 ין לאדם, בימים שבהם אינכם מוזנים ממילא.")],
+    [t("Coffee, konbini, the vending machines", "קפה, קונביני ומכונות אוטומטיות"), 25000,
+     t("In Japan this is not a rounding error. It is where the small money actually goes.",
+       "ביפן זו אינה טעות עיגול. לשם הולך הכסף הקטן באמת.")],
+    [t("Petrol", "דלק"), 15500,
+     t("975 km in an SUV at about 11 km to the litre, at ¥175 a litre.",
+       "975 ק״מ ברכב שטח, כ-11 ק״מ לליטר, ב-175 ין לליטר.")],
+    [t("Expressway tolls", "אגרות כביש מהיר"), 28000,
+     t("Kyoto to Tokyo the long way round. The mountain sections are the dear ones.",
+       "מקיוטו לטוקיו בדרך הארוכה. קטעי ההרים הם היקרים.")],
+    [t("Parking", "חניה"), 15000,
+     t("Six nights with the car at the hotel, plus the paid car parks at the sights.",
+       "שישה לילות עם הרכב במלון, ועוד חניונים בתשלום באתרים.")],
+    [t("Trains, subways and buses", "רכבות, מטרו ואוטובוסים"), 30000,
+     t("The airport run, the rail legs at either end of the driving, and six days on the Tokyo network.",
+       "הנסיעה משדה התעופה, קטעי הרכבת משני צידי הנהיגה, ושישה ימים ברשת של טוקיו.")],
+    [t("Temples, castles, gardens, museums", "מקדשים, טירות, גנים ומוזיאונים"), 30000,
+     t("Around ¥1,000 each on the days there is something to pay to get into.",
+       "כ-1,000 ין לאדם בימים שיש בהם כניסה בתשלום.")],
+    [t("Onsen and public baths", "אונסן ובתי מרחץ"), 12000,
+     t("Takayama and Hakone especially — a day-use bath runs ¥800 to ¥2,000 a head.",
+       "בעיקר טקאיאמה והאקונה — כניסה יומית עולה 800 עד 2,000 ין לאדם.")],
+    [t("Data on the phones", "גלישה בטלפונים"), 6000,
+     t("An eSIM each for the three weeks. Cheaper than roaming and it works the moment you land.",
+       "eSIM לכל אחד לשלושת השבועות. זול מנדידה ועובד ברגע הנחיתה.")],
+    [t("Luggage forwarding and lockers", "משלוח מזוודות ולוקרים"), 10000,
+     t("Sending a case ahead on the days the car is full, and the coin lockers at the stations.",
+       "שליחת מזוודה קדימה בימים שהרכב מלא, ולוקרים בתחנות.")]
+  ];
+
+  /* ---------- where to shop ----------
+
+     Kept as its own section rather than folded into the days, because shopping
+     is not something you schedule — it is something you do when you find
+     yourself with an hour. Each entry is a place you can walk into, not a
+     brand. */
+  var SHOPS = [
+    { base: t("Osaka", "אוסקה"), when: t("4–8 Nov", "4–8 בנוב׳"), items: [
+      [t("Shinsaibashi-suji", "שינסאיבאשי-סוג׳י"),
+       t("Six hundred metres of covered arcade, roofed against the weather and open late. The default place to start.",
+         "שש מאות מטר של מעבר מקורה, מוגן ממזג האוויר ופתוח עד מאוחר. המקום המובן מאליו להתחיל בו."),
+       "Shinsaibashi-suji Shopping Street, Osaka"],
+      [t("Kuromon Ichiba", "שוק קורומון איצ׳יבה"),
+       t("The food market — knives, dried goods, tea, and things to eat standing up.",
+         "שוק המזון — סכינים, מיובשים, תה, ודברים שאוכלים בעמידה."),
+       "Kuromon Ichiba Market, Osaka"],
+      [t("Doguyasuji", "דוגויאסוג׳י"),
+       t("One street, entirely kitchen shops. This is where to buy a knife that will outlive you.",
+         "רחוב אחד, כולו חנויות מטבח. כאן קונים סכין שתאריך ימים מכם."),
+       "Doguyasuji Shopping Street, Osaka"],
+      [t("Den Den Town", "דן דן טאון"),
+       t("Electronics, cameras, and the second-hand shops behind them.",
+         "אלקטרוניקה, מצלמות, וחנויות יד שנייה מאחוריהן."),
+       "Nipponbashi Den Den Town, Osaka"]
+    ]},
+    { base: t("Kyoto", "קיוטו"), when: t("8–12 Nov", "8–12 בנוב׳"), items: [
+      [t("Nishiki Market", "שוק נישיקי"),
+       t("Five narrow blocks of pickles, knives, ceramics and tea. Busy by ten; go early.",
+         "חמישה בלוקים צרים של חמוצים, סכינים, קרמיקה ותה. הומה מעשר; לכו מוקדם."),
+       "Nishiki Market, Kyoto"],
+      [t("Teramachi and Shinkyogoku", "טרמאצ׳י ושינקיוגוקו"),
+       t("Two parallel covered streets — stationery, old bookshops, incense, and the tourist end of things.",
+         "שני רחובות מקורים מקבילים — כלי כתיבה, חנויות ספרים ישנות, קטורת, והצד התיירותי."),
+       "Teramachi Shopping Street, Kyoto"],
+      [t("Ippodo Tea", "איפודו תה"),
+       t("Tea sold the way it was sold in 1717. They will explain what you are buying.",
+         "תה שנמכר כפי שנמכר ב-1717. יסבירו לכם מה אתם קונים."),
+       "Ippodo Tea Kyoto Main Store"],
+      [t("Kyoto Handicraft Center", "מרכז המלאכה של קיוטו"),
+       t("Everything craft under one roof, tax-free counter included. Convenient rather than romantic.",
+         "כל המלאכות תחת קורת גג אחת, כולל דלפק פטור ממס. נוח יותר מאשר רומנטי."),
+       "Kyoto Handicraft Center"]
+    ]},
+    { base: t("Kanazawa", "קנזאווה"), when: t("12–13 Nov", "12–13 בנוב׳"), items: [
+      [t("Omicho Market", "שוק אומיצ׳ו"),
+       t("The city's kitchen for three hundred years. Crab in November.",
+         "המטבח של העיר כבר שלוש מאות שנה. סרטנים בנובמבר."),
+       "Omicho Market, Kanazawa"],
+      [t("Higashi Chaya gold leaf", "עלי זהב בהיגאשי צ׳איה"),
+       t("Kanazawa makes almost all of Japan's gold leaf. The teahouse district is where it is sold.",
+         "קנזאווה מייצרת כמעט את כל עלי הזהב ביפן. ברובע בתי התה הם נמכרים."),
+       "Higashi Chaya District, Kanazawa"],
+      [t("Kutani ware and Kaga yuzen", "קרמיקת קוטני ומשי קאגה יוזן"),
+       t("The local porcelain and the local dyed silk — both worth more attention than a souvenir shop gives them.",
+         "החרסינה המקומית והמשי הצבוע המקומי — שניהם ראויים ליותר תשומת לב מזו שחנות מזכרות נותנת."),
+       "Kanazawa Craft Hirosaka"]
+    ]},
+    { base: t("Takayama", "טקאיאמה"), when: t("13–15 Nov", "13–15 בנוב׳"), items: [
+      [t("Sanmachi old town", "העיר העתיקה סנמאצ׳י"),
+       t("Dark wooden merchant houses, now sake breweries and craft shops. The sake is tasted before it is bought.",
+         "בתי סוחרים מעץ כהה, כיום מבשלות סאקה וחנויות מלאכה. את הסאקה טועמים לפני שקונים."),
+       "Sanmachi Suji, Takayama"],
+      [t("The morning markets", "שוקי הבוקר"),
+       t("Two of them, by the river and by the Jinya, both finished by noon.",
+         "שניים — אחד לצד הנהר ואחד ליד הג׳ינייה, שניהם נגמרים עד הצהריים."),
+       "Miyagawa Morning Market, Takayama"],
+      [t("Ichii-ittobori woodcarving", "גילוף עץ איצ׳י-איטובורי"),
+       t("Carved from a single piece of yew, unpainted. A Takayama thing and nowhere else's.",
+         "מגולף מחתיכת טקסוס אחת, ללא צבע. עניין של טקאיאמה ולא של אף מקום אחר."),
+       "Takayama Ichii Ittobori"]
+    ]},
+    { base: t("Nagoya", "נגויה"), when: t("15–17 Nov", "15–17 בנוב׳"), items: [
+      [t("Osu shopping district", "רובע הקניות אוסו"),
+       t("Covered arcades around a temple — second-hand, electronics, cheap food, and no polish at all.",
+         "מעברים מקורים סביב מקדש — יד שנייה, אלקטרוניקה, אוכל זול, ואפס ליטוש."),
+       "Osu Shopping District, Nagoya"],
+      [t("Noritake", "נוריטקה"),
+       t("The porcelain works, with a factory shop. Seconds at a fraction of the price.",
+         "מפעל החרסינה, עם חנות מפעל. סוג ב׳ בשבריר מהמחיר."),
+       "Noritake Garden, Nagoya"]
+    ]},
+    { base: t("Lake Kawaguchi", "אגם קוואגוצ׳י"), when: t("17–19 Nov", "17–19 בנוב׳"), items: [
+      [t("Not a shopping stop", "לא עצירת קניות"),
+       t("Come for the mountain, not the shops. What there is sits along the north shore and around the station — Fuji in every possible form.",
+         "באים בשביל ההר, לא בשביל החנויות. מה שיש נמצא לאורך החוף הצפוני וסביב התחנה — פוג׳י בכל צורה אפשרית."),
+       "Kawaguchiko Station"]
+    ]},
+    { base: t("Hakone", "האקונה"), when: t("19–20 Nov", "19–20 בנוב׳"), items: [
+      [t("Yosegi-zaiku marquetry", "מרקטרי יוסגי-זאיקו"),
+       t("Patterned wood inlay, made in Hatajuku for two centuries. The puzzle boxes are the famous ones.",
+         "שיבוץ עץ מעוטר, נעשה בהאטאג׳וקו כבר מאתיים שנה. קופסאות החידה הן המפורסמות."),
+       "Hatajuku Yosegi Kaikan, Hakone"]
+    ]},
+    { base: t("Tokyo", "טוקיו"), when: t("20–27 Nov", "20–27 בנוב׳"), items: [
+      [t("Kappabashi", "קאפאבאשי"),
+       t("The restaurant-supply street. Knives, ceramics, and the plastic food in the windows.",
+         "רחוב ציוד המסעדות. סכינים, קרמיקה, ודגמי האוכל מפלסטיק בחלונות."),
+       "Kappabashi Kitchen Town, Tokyo"],
+      [t("Ginza — Itoya", "גינזה — איטויה"),
+       t("Twelve floors of paper and pens. Even if you buy nothing, go up.",
+         "שתים-עשרה קומות של נייר ועטים. גם אם לא תקנו דבר, עלו."),
+       "Itoya Ginza, Tokyo"],
+      [t("Nakamise-dori, Asakusa", "נקאמיסה-דורי, אסאקוסה"),
+       t("The approach to Senso-ji, lined with stalls. Touristy and old at the same time.",
+         "הדרך אל סנסו-ג׳י, מוקפת דוכנים. תיירותי ועתיק בו זמנית."),
+       "Nakamise Shopping Street, Asakusa, Tokyo"],
+      [t("Tsukiji outer market", "השוק החיצוני של צוקיג׳י"),
+       t("The inner market moved; the outer one stayed. Knives, dried fish, tamagoyaki. Mornings only.",
+         "השוק הפנימי עבר; החיצוני נשאר. סכינים, דגים מיובשים, טמגויאקי. בבקרים בלבד."),
+       "Tsukiji Outer Market, Tokyo"],
+      [t("Shibuya and Harajuku", "שיבויה והרג׳וקו"),
+       t("Clothes, and the crowds that come with them. Takeshita-dori is the young end, Omotesando the expensive one.",
+         "בגדים, וההמונים שבאים איתם. טאקשיטה-דורי הוא הצד הצעיר, אומוטסנדו הוא היקר."),
+       "Takeshita Street, Harajuku, Tokyo"],
+      [t("Akihabara", "אקיהאבארה"),
+       t("Electronics, cameras, games, and several floors of things you did not know existed.",
+         "אלקטרוניקה, מצלמות, משחקים, וכמה קומות של דברים שלא ידעתם שקיימים."),
+       "Akihabara Electric Town, Tokyo"],
+      [t("Don Quijote, and Loft", "דון קיחוטה, ולופט"),
+       t("The one for late-night everything, the other for household oddities. Both open when nothing else is.",
+         "האחת לכל דבר אחרי חצות, השנייה למוזרויות בית. שתיהן פתוחות כשכלום אחר לא."),
+       "Don Quijote Shibuya, Tokyo"]
+    ]}
+  ];
+
   var LEDGER = [
     ["Osaka", "04–08 Nov · 4", "Centara Grand Osaka", "175,207", "1,105", "1 XL double", "—", "31 Oct", "—"],
     ["Kyoto", "08–12 Nov · 4", "Cross Hotel Kyoto", "212,437", "1,339", "1 XL double", "—", "06 Nov", "—"],
@@ -3520,6 +3779,7 @@
   /* ---------- cancellation rail ---------- */
 
   function renderRail() {
+    if (!document.getElementById("rail")) return;
     var items = [];
     DATA.legs.forEach(function (leg) {
       leg.options.forEach(function (o) {
@@ -3548,6 +3808,7 @@
   /* ---------- decisions ---------- */
 
   function renderLegs() {
+    if (!document.getElementById("legs")) return;
     var host = document.getElementById("legs");
     host.textContent = "";
 
@@ -3662,6 +3923,83 @@
     return card;
   }
 
+
+  function yen(n) { return "¥" + n.toLocaleString("en-US"); }
+
+  function renderBudget() {
+    var tb = document.getElementById("budget");
+    if (!tb) return;
+    tb.textContent = "";
+
+    var sum = 0;
+    BUDGET.forEach(function (r) { sum += r[1]; });
+    /* A tenth on top, rounded to the nearest five hundred yen so the number
+       reads as the estimate it is rather than as a calculation. */
+    var slack = Math.round(sum * 0.1 / 500) * 500;
+    var total = sum + slack;
+
+    BUDGET.concat([[UI.bSlack, slack, UI.bSlackNote]]).forEach(function (r) {
+      var tr = el("tr");
+      tr.appendChild(el("td", null, r[0]));
+      tr.appendChild(el("td", "num", yen(r[1])));
+      tr.appendChild(el("td", "num", money(Math.round(r[1] / YEN_USD))));
+      tr.appendChild(el("td", null, r[2]));
+      tb.appendChild(tr);
+    });
+
+    var tr = el("tr", "is-total");
+    tr.appendChild(el("td", null, UI.bTotal));
+    tr.appendChild(el("td", "num", yen(total)));
+    tr.appendChild(el("td", "num", money(Math.round(total / YEN_USD))));
+    tr.appendChild(el("td", null, UI.bTotalNote));
+    tb.appendChild(tr);
+
+    document.getElementById("t-spend").textContent = money(Math.round(total / YEN_USD));
+    document.getElementById("t-spend-note").textContent = yen(total) + " " + tx(UI.bAtRate);
+    document.getElementById("t-perday").textContent =
+      money(Math.round(total / YEN_USD / BUDGET_DAYS));
+  }
+
+  function renderShops() {
+    var box = document.getElementById("shops");
+    if (!box) return;
+    box.textContent = "";
+
+    SHOPS.forEach(function (place) {
+      var card = el("div", "settled-card");
+      var h = el("h3", null, place.base);
+      h.appendChild(document.createTextNode(" "));
+      h.appendChild(el("span", "shop-when", place.when));
+      card.appendChild(h);
+
+      place.items.forEach(function (it) {
+        var row = el("div", "shop-item");
+        var name = el("div", "shop-name", it[0]);
+        if (it[2]) {
+          name.appendChild(document.createTextNode(" "));
+          name.appendChild(mapLink(it[2]));
+        }
+        row.appendChild(name);
+        row.appendChild(el("div", "shop-note", it[1]));
+        card.appendChild(row);
+      });
+
+      box.appendChild(card);
+    });
+  }
+
+  /* The public copy of this page is for people who are not cancelling anything.
+     The deadline tile, the cancellation calendar and the choose-one-of-two
+     section are all about a decision that is ours alone, so they come out
+     rather than sitting there inert. */
+  function hidePrivateSections() {
+    if (!PUBLIC) return;
+    ["tile-deadline", "sec-cal", "sec-dup", "th-free"].forEach(function (id) {
+      var n = document.getElementById(id);
+      if (n) n.remove();
+    });
+  }
+
   function renderLedger() {
     var tb = document.getElementById("ledger");
     tb.textContent = "";
@@ -3671,7 +4009,9 @@
     }
     LEDGER.forEach(function (row) {
       var tr = el("tr");
-      (PUBLIC ? row.slice(0, 8) : row).forEach(function (cell, i) {
+      /* Public build: the confirmation column is gone with step 7 of the
+         redaction, and "free until" goes with the cancellation calendar. */
+      (PUBLIC ? row.slice(0, 7) : row).forEach(function (cell, i) {
         var td = el("td", (i === 3 || i === 4 || i === 8) ? "num" : null);
         if (i === 8) {
           var a = linkForRef(cell, cell);
@@ -3726,6 +4066,8 @@
     });
 
     var legCount = DATA.legs.length;
+    /* Those tiles only exist in the private build. */
+    if (!document.getElementById("t-decided")) return;
     document.getElementById("t-decided").textContent = decided + " / " + legCount;
     document.getElementById("t-decided-note").textContent =
       decided === 0 ? tx(UI.nothingChosen) :
@@ -4024,6 +4366,7 @@
   }
   applyTheme();
 
+  hidePrivateSections();
   renderVersion();
   renderTripMap();
   renderItinerary();
@@ -4031,6 +4374,8 @@
   renderLegs();
   renderRail();
   renderLedger();
+  renderBudget();
+  renderShops();
 
   try {
     var raw = localStorage.getItem(LOCAL_KEY);
