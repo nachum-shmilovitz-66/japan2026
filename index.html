@@ -1048,6 +1048,53 @@
     .stage-hotel { margin-left: 0; }
   }
 
+  /* The one button that is used standing in the street, so it is the one
+     that has to be big enough to hit without looking. */
+  .nearbar { display: flex; }
+  .near-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    font: inherit; font-size: var(--step--1); font-weight: 600;
+    color: var(--bg); background: var(--accent);
+    border: 0; border-radius: 999px; padding: 7px 14px 7px 11px;
+    cursor: pointer; min-height: 36px;
+  }
+  .near-btn svg { width: 17px; height: 17px; flex: none; }
+  .near-btn:hover { filter: brightness(1.08); }
+  .near-btn[aria-busy="true"] { opacity: .6; }
+
+  .near {
+    margin: 0 0 20px; padding: 14px 16px 4px;
+    border: 1px solid var(--rule); border-radius: 12px; background: var(--card);
+  }
+  .near-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .near-head h2 { margin: 0; font-size: var(--step-1); }
+  .near-close {
+    font: inherit; font-size: 22px; line-height: 1; color: var(--muted);
+    background: none; border: 0; cursor: pointer; padding: 0 4px;
+  }
+  .near-status { margin: 8px 0 0; color: var(--muted); font-size: var(--step--1); }
+  .near-list { margin: 10px 0 0; padding: 0; list-style: none; }
+  .near-list li { border-top: 1px solid var(--rule); }
+  .near-list li:first-child { border-top: 0; }
+  .near-row {
+    display: flex; align-items: baseline; gap: 10px;
+    padding: 9px 0; color: inherit; text-decoration: none;
+  }
+  .near-dist {
+    font-family: var(--mono); font-variant-numeric: tabular-nums;
+    font-size: var(--step--1); min-width: 62px; flex: none; color: var(--accent);
+  }
+  .near-name { flex: 1 1 auto; }
+  .near-when { color: var(--muted); font-size: var(--step--1); flex: none; }
+  .near-find { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 2px; }
+  .near-find a {
+    font-size: var(--step--1); text-decoration: none; color: inherit;
+    border: 1px solid var(--rule); border-radius: 999px; padding: 6px 12px;
+  }
+  .near-find a:hover { border-color: var(--accent); color: var(--accent); }
+  .near-foot { margin: 12px 0 10px; color: var(--muted); font-size: var(--step--2); }
+  [dir="rtl"] .near-dist { text-align: right; }
+
   @media (prefers-reduced-motion: reduce) {
     * { transition: none !important; animation: none !important; }
   }
@@ -1067,6 +1114,12 @@
         <button type="button" class="theme-btn" data-theme-set="light"><svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M579-381q41-41 41-99t-41-99q-41-41-99-41t-99 41q-41 41-41 99t41 99q41 41 99 41t99-41Zm-240.5 42.5Q280-397 280-480t58.5-141.5Q397-680 480-680t141.5 58.5Q680-563 680-480t-58.5 141.5Q563-280 480-280t-141.5-58.5ZM200-450H40v-60h160v60Zm720 0H760v-60h160v60ZM450-760v-160h60v160h-60Zm0 720v-160h60v160h-60ZM262-658l-100-97 43-44 96 100-39 41Zm494 496-98-100 41-41 99 98-42 43Zm-99-537 98-99 44 42-99 98-43-41ZM162-205l99-98 42 42-98 99-43-43Zm318-275Z"/></svg></button>
         <button type="button" class="theme-btn" data-theme-set="dark"><svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-120q-150 0-255-105T120-480q0-150 105-255t255-105q8 0 17 .5t23 1.5q-36 32-56 79t-20 99q0 90 63 153t153 63q52 0 99-18.5t79-51.5q1 12 1.5 19.5t.5 14.5q0 150-105 255T480-120Zm0-60q109 0 190-67.5T771-406q-25 11-53.67 16.5Q688.67-384 660-384q-114.69 0-195.34-80.66Q384-545.31 384-660q0-24 5-51.5t18-62.5q-98 27-162.5 109.5T180-480q0 125 87.5 212.5T480-180Zm-4-297Z"/></svg></button>
       </div>
+      <div class="nearbar">
+        <button type="button" class="near-btn" id="near-btn">
+          <svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-480q33 0 56.5-23.5T560-560q0-33-23.5-56.5T480-640q-33 0-56.5 23.5T400-560q0 33 23.5 56.5T480-480Zm0 294q122-112 181-203.5T720-552q0-109-69.5-178.5T480-800q-101 0-170.5 69.5T240-552q0 71 59 162.5T480-186Zm0 106Q319-217 239.5-334.5T160-552q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 100-79.5 217.5T480-80Zm0-480Z"/></svg>
+          <span data-k="nearbtn">Near me</span>
+        </button>
+      </div>
     </div>
     <div class="now" id="now" hidden>
       <span class="now-big" id="now-big"></span>
@@ -1077,6 +1130,16 @@
     <h1 data-k="h1">Japan, twenty-two nights</h1>
     <p class="fullplan" id="full-plan-link" hidden><a href="/full/" data-k="fullplan">Travelling with us? The full plan &mdash; booking numbers, confirmations, the lot &mdash; is behind a Google sign-in.</a></p>
     <p class="fullplan" id="apk-link" hidden><a href="https://github.com/nachum-shmilovitz-66/japan2026/releases/latest/download/Japan-2026-public.apk" data-k="apklink">On an Android phone? Install it as an app &mdash; the whole plan travels with you, and works with no signal.</a></p>
+    <section class="near" id="near-panel" hidden>
+      <div class="near-head">
+        <h2 data-k="near-title">What is near you</h2>
+        <button type="button" class="near-close" id="near-close" aria-label="Close">&times;</button>
+      </div>
+      <p class="near-status" id="near-status" aria-live="polite"></p>
+      <ol class="near-list" id="near-list"></ol>
+      <div class="near-find" id="near-find" hidden></div>
+      <p class="near-foot" id="near-foot" hidden data-k="near-foot">Distances are straight lines from where the phone puts you, so the walk is longer. The list needs no signal; opening a map does.</p>
+    </section>
     <p class="standfirst" data-k="standfirst">Osaka to Tokyo the long way round — down the Hokuriku coast, over the mountains through Takayama, past Fuji and into the city. The days below carry what the tickets commit you to, underneath each one what the handwritten sheet says, and under that my own suggestions for that place.</p>
 
     <div class="tiles">
@@ -1376,7 +1439,7 @@
      looking at" has a single answer. Android carries it as versionName and iOS
      as MARKETING_VERSION; both keep a separate build counter that only ever
      rises, because neither platform will install a build that goes backwards. */
-  var VERSION = "1.2.1";
+  var VERSION = "1.3.0";
 
   /* The private build carries every booking reference and its PIN, which together
      are enough to cancel a reservation on Booking.com without logging in. The
@@ -1413,6 +1476,107 @@
 
   var DOW_HE = { Sun: "ראשון", Mon: "שני", Tue: "שלישי", Wed: "רביעי", Thu: "חמישי", Fri: "שישי", Sat: "שבת" };
 
+  /* Where the places in this plan actually are. Geocoded once from
+     OpenStreetMap and checked by name and by city, so a wrong answer was
+     dropped rather than guessed: the ones that could not be verified
+     carry no coordinate and fall back to a map search by name.
+     [name, latitude, longitude, kind, day of November] */
+  var PLACES = [
+    ["Kansai International Airport Terminal 1", 34.42606, 135.27863, "day", 4],
+    ["Nankai Namba Station", 34.66366, 135.50178, "day", 4],
+    ["Hozenji Yokocho", 34.66797, 135.50332, "day", 5],
+    ["Kuromon Ichiba Market", 34.6658, 135.50702, "day", 5],
+    ["Osaka Castle", 34.68718, 135.5254, "day", 5],
+    ["Tombori River Cruise", 34.66914, 135.50271, "day", 5],
+    ["Umeda Sky Building", 34.70529, 135.49053, "day", 5],
+    ["Byodo-in Temple", 34.8895, 135.80745, "day", 6],
+    ["Fushimi Inari Taisha", 34.96752, 135.77971, "day", 6],
+    ["Isuien Garden", 34.68547, 135.83792, "day", 6],
+    ["Kintetsu-Nara Station", 34.68496, 135.82605, "day", 6],
+    ["Todai-ji Temple", 34.6875, 135.83981, "day", 6],
+    ["Himeji Castle", 34.83933, 134.69402, "day", 7],
+    ["Himeji Station", 34.8269, 134.69024, "day", 7],
+    ["Koko-en Garden", 34.83706, 134.69041, "day", 7],
+    ["Minoo Park", 34.84638, 135.47267, "day", 7],
+    ["Adashino Nenbutsu-ji Temple", 35.02692, 135.66463, "day", 8],
+    ["Arashiyama Bamboo Grove", 35.01674, 135.67115, "day", 8],
+    ["Saga-Arashiyama Station", 35.02066, 135.68099, "day", 8],
+    ["Torokko Saga Station", 35.01859, 135.68071, "day", 8],
+    ["Nishiki Market", 35.00502, 135.76557, "day", 9],
+    ["Sanjo Ohashi Bridge", 35.00904, 135.77172, "day", 9],
+    ["Okochi Sanso Villa", 35.01663, 135.66959, "day", 10],
+    ["Randen Arashiyama Station", 35.01024, 135.71506, "day", 10],
+    ["Togetsukyo Bridge", 35.01287, 135.67776, "day", 10],
+    ["Eikando Zenrin-ji Temple", 35.01399, 135.795, "day", 11],
+    ["Honen-in Temple", 35.0222, 135.79701, "day", 11],
+    ["Nanzen-ji Temple", 35.01153, 135.79272, "day", 11],
+    ["Philosopher's Path", 35.01717, 135.79607, "day", 11],
+    ["teamLab Biovortex Kyoto", 34.98375, 135.76542, "day", 11],
+    ["Omicho Market", 36.57173, 136.65599, "day", 12],
+    ["Wada House", 36.25992, 136.90763, "day", 12],
+    ["21st Century Museum of Contemporary Art", 36.56109, 136.65938, "day", 13],
+    ["Kenroku-en Garden", 36.56243, 136.66235, "day", 13],
+    ["Sanmachi Suji", 36.14087, 137.25966, "day", 13],
+    ["Hirayu Onsen Bus Terminal", 36.19061, 137.55175, "day", 14],
+    ["Shinhotaka Ropeway", 36.27524, 137.59129, "day", 14],
+    ["Takayama Jinya", 36.13983, 137.25908, "day", 14],
+    ["Magome-juku Tourist Information Center", 35.52684, 137.56772, "day", 15],
+    ["Tsumago-juku", 35.57699, 137.59542, "day", 15],
+    ["Oishi Park", 35.52329, 138.74654, "day", 16],
+    ["SCMaglev and Railway Park", 35.04887, 136.85121, "day", 16],
+    ["Suwako Service Area", 36.02612, 138.07634, "day", 16],
+    ["Mishima Skywalk", 35.15245, 138.98056, "day", 17],
+    ["Mt. Fuji Panoramic Ropeway", 35.50408, 138.77205, "day", 17],
+    ["Ubuyagasaki", 35.51285, 138.76613, "day", 17],
+    ["Oshino Hakkai", 35.46024, 138.8327, "day", 18],
+    ["Pola Museum of Art", 35.25666, 139.0212, "day", 18],
+    ["Hakone Museum of Art", 35.24819, 139.04271, "day", 19],
+    ["Hakone Shrine", 35.20397, 139.02558, "day", 19],
+    ["Moto-Hakone Port", 35.20283, 139.0306, "day", 19],
+    ["Owakudani", 35.24741, 139.02421, "day", 19],
+    ["The Hakone Open-Air Museum", 35.24428, 139.05208, "day", 19],
+    ["Togendai Port", 35.23756, 138.99457, "day", 19],
+    ["KITTE Marunouchi", 35.67986, 139.76478, "day", 20],
+    ["Meiji Jingu", 35.67484, 139.69963, "day", 21],
+    ["Nezu Museum", 35.66224, 139.71726, "day", 21],
+    ["Nikko Toshogu Shrine", 36.75764, 139.59911, "day", 21],
+    ["Omotesando", 35.66517, 139.71244, "day", 21],
+    ["Shibuya Sky", 35.65829, 139.70226, "day", 21],
+    ["Ginza Chuo-dori", 35.67149, 139.76526, "day", 22],
+    ["Hamarikyu Gardens", 35.66423, 139.76405, "day", 22],
+    ["Senso-ji Temple", 35.7134, 139.79553, "day", 22],
+    ["Imperial Palace East Gardens", 35.6867, 139.7574, "day", 24],
+    ["Kotoku-in Great Buddha", 35.3165, 139.53573, "day", 24],
+    ["Nihonbashi Mitsukoshi Main Store", 35.68563, 139.77344, "day", 24],
+    ["Tsukiji Outer Market", 35.66539, 139.77047, "day", 24],
+    ["Shinjuku Gyoen National Garden", 35.68507, 139.70955, "day", 25],
+    ["Haneda Airport Terminal 3", 35.54389, 139.76865, "day", 26],
+    ["Akihabara Electric Town", 35.69917, 139.77263, "shop", 0],
+    ["Doguyasuji Shopping Street", 34.66393, 135.50352, "shop", 0],
+    ["Don Quijote Shibuya", 35.66045, 139.69784, "shop", 0],
+    ["Higashi Chaya District", 36.57256, 136.66668, "shop", 0],
+    ["Itoya Ginza", 35.67296, 139.76743, "shop", 0],
+    ["Kappabashi Kitchen Town", 35.71425, 139.78889, "shop", 0],
+    ["Kawaguchiko Station", 35.49856, 138.76834, "shop", 0],
+    ["Kyoto Handicraft Center", 35.01756, 135.78025, "shop", 0],
+    ["Miyagawa Morning Market", 36.14469, 137.25785, "shop", 0],
+    ["Nakamise Shopping Street", 35.71228, 139.79649, "shop", 0],
+    ["Nipponbashi Den Den Town", 34.65922, 135.50582, "shop", 0],
+    ["Noritake Garden", 35.17948, 136.87952, "shop", 0],
+    ["Osu Shopping District", 35.15967, 136.89931, "shop", 0],
+    ["Shinsaibashi-suji Shopping Street", 34.67422, 135.50137, "shop", 0],
+    ["Takeshita Street", 35.67116, 139.70496, "shop", 0],
+    ["Centara Grand Hotel Osaka", 34.66002, 135.50221, "stay", 0],
+    ["Cross Hotel Kyoto", 35.00822, 135.76976, "stay", 0],
+    ["Good Nature Hotel Kyoto", 35.00255, 135.76859, "stay", 0],
+    ["HOTEL WOOD TAKAYAMA", 36.14082, 137.26035, "stay", 0],
+    ["Hakone Kowakien Mizunoto", 35.23945, 139.04586, "stay", 0],
+    ["Hotel Indigo Hakone Gora", 35.25268, 139.0505, "stay", 0],
+    ["Hotel Nikko Kanazawa", 36.57636, 136.64928, "stay", 0],
+    ["Nikko Style Nagoya", 35.16991, 136.89124, "stay", 0],
+    ["Takayama Green Hotel", 36.13773, 137.24721, "stay", 0],
+  ];
+
   var UI = {
     bSlack: t("Room for the unplanned", "מקום לבלתי צפוי"),
     bSlackNote: t("A tenth on top. Something always costs more than it was supposed to.",
@@ -1421,6 +1585,24 @@
     bTotalNote: t("Two people, twenty-four days, shopping excluded",
                   "שני אנשים, עשרים וארבעה ימים, ללא קניות"),
     bAtRate: t("at the rate the confirmations imply", "לפי השער שעולה מהאישורים"),
+    nAsking: t("Asking the phone where you are\u2026", "\u05e9\u05d5\u05d0\u05dc \u05d0\u05ea \u05d4\u05d8\u05dc\u05e4\u05d5\u05df \u05d0\u05d9\u05e4\u05d4 \u05d0\u05ea\u05dd\u2026"),
+    nDenied: t("The phone would not share your location. Allow it for this page, or open the settings and turn location on for the app.",
+               "\u05d4\u05d8\u05dc\u05e4\u05d5\u05df \u05dc\u05d0 \u05e9\u05d9\u05ea\u05e3 \u05d0\u05ea \u05d4\u05de\u05d9\u05e7\u05d5\u05dd. \u05d0\u05e9\u05e8\u05d5 \u05dc\u05d3\u05e3 \u05d4\u05d6\u05d4, \u05d0\u05d5 \u05d4\u05e4\u05e2\u05d9\u05dc\u05d5 \u05de\u05d9\u05e7\u05d5\u05dd \u05dc\u05d0\u05e4\u05dc\u05d9\u05e7\u05e6\u05d9\u05d4 \u05d1\u05d4\u05d2\u05d3\u05e8\u05d5\u05ea."),
+    nFailed: t("The phone could not work out where you are. Under a roof or underground this is normal \u2014 step outside and try again.",
+               "\u05d4\u05d8\u05dc\u05e4\u05d5\u05df \u05dc\u05d0 \u05d4\u05e6\u05dc\u05d9\u05d7 \u05dc\u05e7\u05d1\u05d5\u05e2 \u05d0\u05ea \u05d4\u05de\u05d9\u05e7\u05d5\u05dd. \u05de\u05ea\u05d7\u05ea \u05dc\u05d2\u05d2 \u05d0\u05d5 \u05de\u05ea\u05d7\u05ea \u05dc\u05d0\u05d3\u05de\u05d4 \u05d6\u05d4 \u05e8\u05d2\u05d9\u05dc \u2014 \u05e6\u05d0\u05d5 \u05d4\u05d7\u05d5\u05e6\u05d4 \u05d5\u05e0\u05e1\u05d5 \u05e9\u05d5\u05d1."),
+    nNoSupport: t("This browser will not share a location.", "\u05d4\u05d3\u05e4\u05d3\u05e4\u05df \u05d4\u05d6\u05d4 \u05dc\u05d0 \u05de\u05e9\u05ea\u05e3 \u05de\u05d9\u05e7\u05d5\u05dd."),
+    nFar: t("Nothing in the plan is close. The nearest is %s away \u2014 you are probably not in Japan yet.",
+            "\u05e9\u05d5\u05dd \u05d3\u05d1\u05e8 \u05d1\u05ea\u05d5\u05db\u05e0\u05d9\u05ea \u05dc\u05d0 \u05e7\u05e8\u05d5\u05d1. \u05d4\u05e7\u05e8\u05d5\u05d1 \u05d1\u05d9\u05d5\u05ea\u05e8 \u05d1\u05de\u05e8\u05d7\u05e7 %s \u2014 \u05db\u05e0\u05e8\u05d0\u05d4 \u05e2\u05d3\u05d9\u05d9\u05df \u05dc\u05d0 \u05d1\u05d9\u05e4\u05df."),
+    nFound: t("Nearest first, from the plan.", "\u05d4\u05e7\u05e8\u05d5\u05d1\u05d9\u05dd \u05e7\u05d5\u05d3\u05dd, \u05de\u05ea\u05d5\u05da \u05d4\u05ea\u05d5\u05db\u05e0\u05d9\u05ea."),
+    nStay: t("where we sleep", "\u05d4\u05dc\u05d9\u05e0\u05d4"),
+    nShop: t("shopping", "\u05e7\u05e0\u05d9\u05d5\u05ea"),
+    nNov: t("Nov", "\u05d1\u05e0\u05d5\u05d1\u05f3"),
+    nFood: t("Food", "\u05d0\u05d5\u05db\u05dc"),
+    nCoffee: t("Coffee", "\u05e7\u05e4\u05d4"),
+    nKonbini: t("7-Eleven (ATM)", "7-Eleven (\u05db\u05e1\u05e4\u05d5\u05de\u05d8)"),
+    nPharmacy: t("Pharmacy", "\u05d1\u05d9\u05ea \u05de\u05e8\u05e7\u05d7\u05ea"),
+    nStation: t("Station", "\u05ea\u05d7\u05e0\u05d4"),
+    nToilet: t("Toilets", "\u05e9\u05d9\u05e8\u05d5\u05ea\u05d9\u05dd"),
     langEn: t("English", "אנגלית"),
     langHe: t("Hebrew", "עברית"),
     themeAuto: t("Follow the phone", "לפי הטלפון"),
@@ -1589,6 +1771,9 @@
     "hint-res": "שבע-עשרה מקומות, לפי סדר המסלול — אלו שבחרנו, ושנמליץ עליהם בשמחה.",
     "fullplan": "נוסעים איתנו? התוכנית המלאה — מספרי ההזמנות, האישורים, הכול — נמצאת מאחורי כניסה עם Google.",
     "apklink": "עם אנדרואיד? אפשר להתקין את התוכנית כאפליקציה — הכול נוסע איתכם, ועובד גם בלי קליטה.",
+    "nearbtn": "מה קרוב",
+    "near-title": "מה קרוב אליכם",
+    "near-foot": "המרחקים בקו אווירי מהמקום שהטלפון מזהה, כך שההליכה ארוכה יותר. הרשימה עובדת בלי קליטה; פתיחת מפה דורשת קליטה.",
     "h2-budget": "כמה יעלו הימים עצמם",
     "hint-budget": "כמה שניכם מוציאים אחרי שאתם כבר שם — אוכל, נהיגה, נסיעות, כניסות. לא הלינה, לא הטיסות, לא הרכב, ואף לא ין אחד של קניות.",
     "tl-spend": "בשטח",
@@ -1685,6 +1870,7 @@
     renderLedger();
     renderBudget();
     renderShops();
+    renderNear();
     applyPicks();
     renderNow();
     refreshStaticMapLinks();
@@ -4013,11 +4199,16 @@
        else who follows it meets Google and is turned away, which costs nothing
        and tells them nothing. */
     /* Both lines belong to the public copy only: the private build already is
-       the full plan, and the shareable APK is what its readers are holding. */
-    ["full-plan-link", "apk-link"].forEach(function (id) {
-      var n = document.getElementById(id);
-      if (n) n.hidden = false;
-    });
+       the full plan, and the shareable APK is what its readers are holding.
+       Inside the two apps the page is a local file, where "/full/" resolves to
+       nothing and an offer to install the app is being read inside the app, so
+       neither line is shown there. */
+    if (location.protocol !== "file:") {
+      ["full-plan-link", "apk-link"].forEach(function (id) {
+        var n = document.getElementById(id);
+        if (n) n.hidden = false;
+      });
+    }
     ["tile-deadline", "sec-cal", "sec-dup", "th-free"].forEach(function (id) {
       var n = document.getElementById(id);
       if (n) n.remove();
@@ -4380,6 +4571,119 @@
     window.speechSynthesis.onvoiceschanged = function () { if (currentGuide) showGuide(currentGuide); };
   }
 
+  /* ---------------- what is near me ----------------
+
+     The distinctive half of this works with no signal at all: the plan knows
+     where its places are, the phone's GPS needs no data connection, and the
+     sort between them is arithmetic. Only opening a map needs the network.  */
+
+  var nearFix = null;          // the last position the phone gave us
+
+  function haversineKm(lat1, lon1, lat2, lon2) {
+    var R = 6371, rad = Math.PI / 180;
+    var dLat = (lat2 - lat1) * rad, dLon = (lon2 - lon1) * rad;
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * rad) * Math.cos(lat2 * rad) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return 2 * R * Math.asin(Math.sqrt(a));
+  }
+
+  function distanceText(km) {
+    if (km < 1) return Math.round(km * 1000 / 10) * 10 + " m";
+    if (km < 10) return km.toFixed(1) + " km";
+    return Math.round(km) + " km";
+  }
+
+  function mapsSearch(term, lat, lon) {
+    return "https://www.google.com/maps/search/" + encodeURIComponent(term) +
+           "/@" + lat + "," + lon + ",16z";
+  }
+
+  function walkTo(lat, lon) {
+    return "https://www.google.com/maps/dir/?api=1&destination=" +
+           lat + "," + lon + "&travelmode=walking";
+  }
+
+  function renderNear() {
+    if (!nearFix) return;
+    var list = document.getElementById("near-list");
+    var status = document.getElementById("near-status");
+    var find = document.getElementById("near-find");
+    var foot = document.getElementById("near-foot");
+    list.textContent = "";
+    find.textContent = "";
+
+    var here = nearFix;
+    var ranked = PLACES.map(function (pl) {
+      return { name: pl[0], lat: pl[1], lon: pl[2], kind: pl[3], day: pl[4],
+               km: haversineKm(here.lat, here.lon, pl[1], pl[2]) };
+    }).sort(function (a, b) { return a.km - b.km; });
+
+    /* Away from Japan every distance is a thousand kilometres and the list
+       tells you nothing, so say that instead of printing it. */
+    if (ranked.length && ranked[0].km > 300) {
+      status.textContent = tx(UI.nFar).replace("%s", distanceText(ranked[0].km));
+    } else {
+      status.textContent = tx(UI.nFound);
+      ranked.slice(0, 8).forEach(function (r) {
+        var li = el("li");
+        var a = el("a", "near-row");
+        a.href = walkTo(r.lat, r.lon);
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.appendChild(el("span", "near-dist", distanceText(r.km)));
+        a.appendChild(el("span", "near-name", r.name));
+        var when = r.kind === "stay" ? tx(UI.nStay)
+                 : r.kind === "shop" ? tx(UI.nShop)
+                 : r.day ? r.day + " " + tx(UI.nNov) : "";
+        if (when) a.appendChild(el("span", "near-when", when));
+        li.appendChild(a);
+        list.appendChild(li);
+      });
+    }
+
+    /* For everything the plan does not carry — dinner, most of all — hand the
+       job to the app they would have opened anyway. No key, no cost, no data
+       of ours to go stale. */
+    [[UI.nFood, "restaurants"], [UI.nCoffee, "cafe"], [UI.nKonbini, "7-Eleven"],
+     [UI.nPharmacy, "pharmacy"], [UI.nStation, "train station"],
+     [UI.nToilet, "public toilet"]].forEach(function (pair) {
+      var a = el("a", null, pair[0]);
+      a.href = mapsSearch(pair[1], here.lat, here.lon);
+      a.target = "_blank";
+      a.rel = "noopener";
+      find.appendChild(a);
+    });
+    find.hidden = false;
+    foot.hidden = false;
+  }
+
+  function nearMe() {
+    var panel = document.getElementById("near-panel");
+    var status = document.getElementById("near-status");
+    var btn = document.getElementById("near-btn");
+    panel.hidden = false;
+    document.getElementById("near-find").hidden = true;
+    document.getElementById("near-foot").hidden = true;
+    document.getElementById("near-list").textContent = "";
+
+    if (!navigator.geolocation) {
+      status.textContent = tx(UI.nNoSupport);
+      return;
+    }
+    status.textContent = tx(UI.nAsking);
+    btn.setAttribute("aria-busy", "true");
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      btn.removeAttribute("aria-busy");
+      nearFix = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+      renderNear();
+    }, function (err) {
+      btn.removeAttribute("aria-busy");
+      status.textContent = tx(err && err.code === 1 ? UI.nDenied : UI.nFailed);
+    }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 });
+  }
+
+
   /* ---------- boot ---------- */
 
   applyStatic();
@@ -4388,6 +4692,11 @@
   for (var lb = 0; lb < langButtons.length; lb++) {
     langButtons[lb].addEventListener("click", function () { setLang(this.dataset.lang); });
   }
+
+  document.getElementById("near-btn").addEventListener("click", nearMe);
+  document.getElementById("near-close").addEventListener("click", function () {
+    document.getElementById("near-panel").hidden = true;
+  });
 
   var themeButtons = document.querySelectorAll(".theme-btn");
   for (var tbn = 0; tbn < themeButtons.length; tbn++) {
