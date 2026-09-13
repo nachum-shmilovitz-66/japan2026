@@ -517,6 +517,16 @@
   }
   .rail-head .hint { font-size: var(--step--1); color: var(--muted); max-width: 58ch; }
 
+  /* Only the public copy shows this; the private copy IS the full plan. */
+  .fullplan {
+    margin: 0 0 18px;
+    font-size: var(--step--1);
+    border-inline-start: 3px solid var(--accent);
+    padding-inline-start: 12px;
+  }
+  .fullplan a { color: var(--accent-ink); text-decoration: none; border-bottom: 1px solid var(--rule); }
+  .fullplan a:hover { border-bottom-color: var(--accent); }
+
   /* ---------- itinerary ---------- */
 
   .stage-head {
@@ -1065,6 +1075,8 @@
     </div>
     <div class="eyebrow" data-k="eyebrow">Michal &amp; Nachum · 03–27 November 2026</div>
     <h1 data-k="h1">Japan, twenty-two nights</h1>
+    <p class="fullplan" id="full-plan-link" hidden><a href="/full/" data-k="fullplan">Travelling with us? The full plan &mdash; booking numbers, confirmations, the lot &mdash; is behind a Google sign-in.</a></p>
+    <p class="fullplan" id="apk-link" hidden><a href="https://github.com/nachum-shmilovitz-66/japan2026/releases/latest/download/Japan-2026-public.apk" data-k="apklink">On an Android phone? Install it as an app &mdash; the whole plan travels with you, and works with no signal.</a></p>
     <p class="standfirst" data-k="standfirst">Osaka to Tokyo the long way round — down the Hokuriku coast, over the mountains through Takayama, past Fuji and into the city. The days below carry what the tickets commit you to, underneath each one what the handwritten sheet says, and under that my own suggestions for that place.</p>
 
     <div class="tiles">
@@ -1364,7 +1376,7 @@
      looking at" has a single answer. Android carries it as versionName and iOS
      as MARKETING_VERSION; both keep a separate build counter that only ever
      rises, because neither platform will install a build that goes backwards. */
-  var VERSION = "1.2.0";
+  var VERSION = "1.2.1";
 
   /* The private build carries every booking reference and its PIN, which together
      are enough to cancel a reservation on Booking.com without logging in. The
@@ -1575,6 +1587,8 @@
     "hint-wallet": "הטיסות והרכב — השניים שאין להם חלופה.",
     "h2-res": "כל ההזמנות",
     "hint-res": "שבע-עשרה מקומות, לפי סדר המסלול — אלו שבחרנו, ושנמליץ עליהם בשמחה.",
+    "fullplan": "נוסעים איתנו? התוכנית המלאה — מספרי ההזמנות, האישורים, הכול — נמצאת מאחורי כניסה עם Google.",
+    "apklink": "עם אנדרואיד? אפשר להתקין את התוכנית כאפליקציה — הכול נוסע איתכם, ועובד גם בלי קליטה.",
     "h2-budget": "כמה יעלו הימים עצמם",
     "hint-budget": "כמה שניכם מוציאים אחרי שאתם כבר שם — אוכל, נהיגה, נסיעות, כניסות. לא הלינה, לא הטיסות, לא הרכב, ואף לא ין אחד של קניות.",
     "tl-spend": "בשטח",
@@ -3995,6 +4009,15 @@
      rather than sitting there inert. */
   function hidePrivateSections() {
     if (!PUBLIC) return;
+    /* The way in for the four people who are allowed the real thing. Everyone
+       else who follows it meets Google and is turned away, which costs nothing
+       and tells them nothing. */
+    /* Both lines belong to the public copy only: the private build already is
+       the full plan, and the shareable APK is what its readers are holding. */
+    ["full-plan-link", "apk-link"].forEach(function (id) {
+      var n = document.getElementById(id);
+      if (n) n.hidden = false;
+    });
     ["tile-deadline", "sec-cal", "sec-dup", "th-free"].forEach(function (id) {
       var n = document.getElementById(id);
       if (n) n.remove();

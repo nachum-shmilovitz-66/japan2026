@@ -12,3 +12,15 @@ copy carries for the travellers' own use. Nothing here is confidential.
 
 English and Hebrew, light and dark, and a route map drawn as inline SVG so it
 works with no signal.
+
+## Where it is served
+
+<https://japan2026.xyz>, from Cloudflare Pages. This repository is the source of
+record for the public copy; it no longer serves the site itself, so there is no
+GitHub Pages deployment and no `CNAME` file.
+
+## Android
+
+The releases here carry `Japan-2026-public.apk` — the same page wrapped as an
+app, so it opens from the launcher and works with no signal. It installs
+alongside anything else and asks for no permissions.
