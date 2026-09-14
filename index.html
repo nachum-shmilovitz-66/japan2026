@@ -1138,7 +1138,6 @@
       </button>
       <span class="app-full-note" id="app-full-note" data-k="appfull-note">Booking numbers and confirmations, for the four of us. Sign in once with a code sent to your email; after that it works with no signal.</span>
     </p>
-    <p class="fullplan" id="apk-link" hidden><a href="https://github.com/nachum-shmilovitz-66/japan2026/releases/latest/download/Japan-2026.apk" data-k="apklink">On an Android phone? Install it as an app &mdash; the whole plan travels with you, and works with no signal.</a></p>
     <section class="near" id="near-panel" hidden>
       <div class="near-head">
         <h2 data-k="near-title">What is near you</h2>
@@ -1448,7 +1447,7 @@
      looking at" has a single answer. Android carries it as versionName and iOS
      as MARKETING_VERSION; both keep a separate build counter that only ever
      rises, because neither platform will install a build that goes backwards. */
-  var VERSION = "1.2.2";
+  var VERSION = "1.2.3";
 
   /* The private build carries every booking reference and its PIN, which together
      are enough to cancel a reservation on Booking.com without logging in. The
@@ -1785,7 +1784,6 @@
     "h2-res": "כל ההזמנות",
     "hint-res": "שבע-עשרה מקומות, לפי סדר המסלול — אלו שבחרנו, ושנמליץ עליהם בשמחה.",
     "fullplan": "נוסעים איתנו? התוכנית המלאה — מספרי ההזמנות, האישורים, הכול — נמצאת מאחורי כניסה עם Google.",
-    "apklink": "עם אנדרואיד? אפשר להתקין את התוכנית כאפליקציה — הכול נוסע איתכם, ועובד גם בלי קליטה.",
     "nearbtn": "מה קרוב",
     "appfull": "התוכנית המלאה",
     "appfull-note": "מספרי הזמנות ואישורים, לארבעתנו. נכנסים פעם אחת עם קוד שנשלח למייל; אחר כך זה עובד גם בלי קליטה.",
@@ -4217,11 +4215,9 @@
     /* The way in for the four people who are allowed the real thing. Everyone
        else who follows it meets Google and is turned away, which costs nothing
        and tells them nothing. */
-    /* Both lines belong to the public copy only: the private build already is
-       the full plan, and the shareable APK is what its readers are holding.
-       Inside the two apps the page is a local file, where "/full/" resolves to
-       nothing and an offer to install the app is being read inside the app, so
-       neither line is shown there. */
+    /* The line belongs to the public copy only: the private build already is
+       the full plan. Inside the two apps it is not shown either, since there
+       "/full/" resolves to nothing. */
     /* Three places this copy can be running, and each wants something else.
        Ask the shell rather than the address bar: a page saved to disk is also
        "file:", and it can do neither. */
@@ -4237,10 +4233,8 @@
       showAppFull(function () { window.webkit.messageHandlers.full.postMessage("open"); },
                   window.__fullCached === true);
     } else if (location.protocol !== "file:") {
-      ["full-plan-link", "apk-link"].forEach(function (id) {
-        var n = document.getElementById(id);
-        if (n) n.hidden = false;
-      });
+      var link = document.getElementById("full-plan-link");
+      if (link) link.hidden = false;
     }
     ["tile-deadline", "sec-cal", "sec-dup", "th-free"].forEach(function (id) {
       var n = document.getElementById(id);
