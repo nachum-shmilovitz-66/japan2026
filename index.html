@@ -1448,7 +1448,7 @@
      looking at" has a single answer. Android carries it as versionName and iOS
      as MARKETING_VERSION; both keep a separate build counter that only ever
      rises, because neither platform will install a build that goes backwards. */
-  var VERSION = "1.4.0";
+  var VERSION = "1.2.2";
 
   /* The private build carries every booking reference and its PIN, which together
      are enough to cancel a reservation on Booking.com without logging in. The
@@ -1594,6 +1594,8 @@
     bTotalNote: t("Two people, twenty-four days, shopping excluded",
                   "שני אנשים, עשרים וארבעה ימים, ללא קניות"),
     bAtRate: t("at the rate the confirmations imply", "לפי השער שעולה מהאישורים"),
+    fullNeedsPin: t("That sign-in cannot be completed inside an app \u2014 Google does not allow it. On the sign-in page, use the email field and the code it sends instead.",
+                    "\u05d0\u05d9-\u05d0\u05e4\u05e9\u05e8 \u05dc\u05d4\u05e9\u05dc\u05d9\u05dd \u05db\u05e0\u05d9\u05e1\u05d4 \u05d6\u05d5 \u05d1\u05ea\u05d5\u05da \u05d0\u05e4\u05dc\u05d9\u05e7\u05e6\u05d9\u05d4 \u2014 Google \u05dc\u05d0 \u05de\u05d0\u05e4\u05e9\u05e8 \u05d6\u05d0\u05ea. \u05d1\u05d3\u05e3 \u05d4\u05db\u05e0\u05d9\u05e1\u05d4, \u05d4\u05e9\u05ea\u05de\u05e9\u05d5 \u05d1\u05e9\u05d3\u05d4 \u05d4\u05de\u05d9\u05d9\u05dc \u05d5\u05d1\u05e7\u05d5\u05d3 \u05e9\u05e0\u05e9\u05dc\u05d7 \u05d0\u05dc\u05d9\u05d5."),
     fullCached: t("Kept on this phone \u2014 opens with no signal.",
                   "\u05e0\u05e9\u05de\u05e8 \u05d1\u05de\u05db\u05e9\u05d9\u05e8 \u2014 \u05e0\u05e4\u05ea\u05d7 \u05d2\u05dd \u05d1\u05dc\u05d9 \u05e7\u05dc\u05d9\u05d8\u05d4."),
     fullNeedsSignal: t("This needs a signal once. Open it where there is data, and it is yours offline afterwards.",
@@ -4619,6 +4621,13 @@
   window.__fullUnavailable = function () {
     var note = document.getElementById("app-full-note");
     if (note) note.textContent = tx(UI.fullNeedsSignal);
+  };
+
+  /* Called by the shell when the gate tried to send us to Google, which no app
+     can complete. Better to say so here than to disappear into a browser. */
+  window.__fullNeedsPin = function () {
+    var note = document.getElementById("app-full-note");
+    if (note) note.textContent = tx(UI.fullNeedsPin);
   };
 
 
