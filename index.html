@@ -113,16 +113,17 @@
      the middle of a day's reading, not only at the top of the page. */
   .wrap > .bars {
     position: sticky;
-    /* The app draws edge to edge, so the top of the page can sit under the
-       status bar once it is scrolled; this keeps the row clear of it. */
-    top: env(safe-area-inset-top, 0px);
+    top: 0;
     z-index: 40;
     display: flex;
     align-self: stretch;
     align-items: center;
     flex-wrap: wrap;
     gap: 10px;
-    padding: 10px 0 10px;
+    /* The app draws edge to edge, so the row has to carry the status bar's
+       height itself when the phone reports one. */
+    padding: 10px 0;
+    padding-top: calc(10px + env(safe-area-inset-top, 0px));
     /* Full-bleed backing, so nothing scrolls visibly behind the buttons. */
     margin-inline: -24px;
     padding-inline: 24px;
@@ -1515,7 +1516,7 @@
      looking at" has a single answer. Android carries it as versionName and iOS
      as MARKETING_VERSION; both keep a separate build counter that only ever
      rises, because neither platform will install a build that goes backwards. */
-  var VERSION = "1.2.16";
+  var VERSION = "1.2.17";
 
   /* The private build carries every booking reference and its PIN, which together
      are enough to cancel a reservation on Booking.com without logging in. The
