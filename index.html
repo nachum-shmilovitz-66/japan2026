@@ -101,7 +101,7 @@
   .wrap {
     max-width: 1140px;
     margin: 0 auto;
-    padding: 40px 24px 96px;
+    padding: 14px 24px 96px;
     display: flex;
     flex-direction: column;
     gap: 48px;
@@ -109,39 +109,28 @@
 
   /* ---------- language ---------- */
 
-  .bars {
+  /* The bar stays on screen: language, light/dark and "Near me" are wanted in
+     the middle of a day's reading, not only at the top of the page. */
+  .wrap > .bars {
+    position: sticky;
+    top: 0;
+    z-index: 40;
     display: flex;
-    align-self: flex-start;
+    align-self: stretch;
     align-items: center;
     flex-wrap: wrap;
     gap: 10px;
+    padding: 8px 0;
+    /* Full-bleed backing, so nothing scrolls visibly behind the buttons. */
+    margin-inline: -24px;
+    padding-inline: 24px;
+    background: var(--paper);
+    border-bottom: 1px solid transparent;
   }
-  .langbar, .themebar {
-    display: inline-flex;
-    border: 1px solid var(--rule);
-    border-radius: 3px;
-    overflow: hidden;
-    background: var(--surface);
-  }
-  .lang-btn, .theme-btn {
-    font-family: var(--mono);
-    font-size: var(--step--1);
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    padding: 6px 11px;
-    border: 0;
-    background: transparent;
-    color: var(--muted);
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 38px;
-    line-height: 1;
-  }
-  /* Material Symbols (outlined, weight 400) — the icons Android and iOS users
-     already know, rather than hand-drawn approximations of them. */
-  .lang-btn svg, .theme-btn svg, .bar-icon svg { width: 17px; height: 17px; display: block; }
+  .bars.is-stuck { border-bottom-color: var(--rule); }
+  /* Line icons drawn as plain geometry — a globe, a sun, a crescent, a
+     half-filled disc — so they read the same on Android and on iOS, where
+     the platform's own language and appearance controls look like this. */
   .bar-icon {
     display: inline-flex;
     align-items: center;
@@ -150,9 +139,7 @@
     border-inline-end: 1px solid var(--rule);
     background: var(--surface-2);
   }
-  .lang-btn + .lang-btn, .theme-btn + .theme-btn { border-inline-start: 1px solid var(--rule); }
-  .lang-btn.is-on, .theme-btn.is-on { background: var(--accent-wash); color: var(--accent-ink); font-weight: 600; }
-  .lang-btn:focus-visible, .theme-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .set-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 
   /* ---------- the route map ---------- */
 
@@ -249,7 +236,7 @@
   [dir="rtl"] td.num,
   [dir="rtl"] .d-date,
   [dir="rtl"] .shc-price { direction: ltr; unicode-bidi: isolate; }
-  [dir="rtl"] .eyebrow, [dir="rtl"] .lang-btn, [dir="rtl"] .theme-btn { letter-spacing: 0; }
+  [dir="rtl"] .eyebrow, [dir="rtl"] #lang-btn { letter-spacing: 0; }
   [dir="rtl"] th, [dir="rtl"] td { text-align: right; }
   [dir="rtl"] .day-when { border-right: 0; border-left: 1px solid var(--rule-soft); }
   [dir="rtl"] .day-flag { border-left: 0; border-right: 3px solid var(--urgent); }
@@ -1038,7 +1025,8 @@
   .footnote { font-size: var(--step--1); color: var(--muted); max-width: 70ch; line-height: 1.6; }
 
   @media (max-width: 680px) {
-    .wrap { padding: 28px 15px 64px; gap: 36px; }
+    .wrap { padding: 10px 15px 64px; gap: 36px; }
+    .bars { margin-inline: -15px; padding-inline: 15px; }
     h1 { font-size: var(--step-3); }
     .day { grid-template-columns: 1fr; }
     ol.ideas-list li { grid-template-columns: 1fr; gap: 2px; }
@@ -1120,6 +1108,31 @@
   .eat-links a:hover { border-color: var(--accent); color: var(--accent); }
 
   /* Settings. One question so far, so it reads as a question rather than a panel. */
+  /* Settings is a dialog, not another card in the flow: it opened between the
+     title and the standfirst before, which read as part of the page. */
+  .set-btn {
+    background: none; border: 1px solid var(--rule); color: inherit;
+    padding: 0; width: 38px; height: 38px; justify-content: center;
+  }
+  .set-btn svg { width: 19px; height: 19px; display: block; }
+  #lang-btn {
+    font-family: var(--mono); font-size: var(--step--1); letter-spacing: .04em;
+    width: auto; min-width: 44px; padding: 0 10px;
+  }
+  .set-back {
+    position: fixed; inset: 0; z-index: 60;
+    display: flex; align-items: center; justify-content: center;
+    padding: 18px; background: rgba(0, 0, 0, .55);
+  }
+  .set-back > .near {
+    margin: 0; width: 100%; max-width: 420px;
+    /* --card was never defined, so the card is transparent; over a page that
+       is fine and over a backdrop it is not. */
+    background: var(--surface);
+    max-height: 85vh; overflow-y: auto;
+    padding-bottom: 14px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, .45);
+  }
   .set-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; }
   .set-hint { margin: 8px 0 0; color: var(--muted); font-size: var(--step--2); }
   #app-full { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border: 0; padding: 0; }
@@ -1132,30 +1145,23 @@
 </style>
 
 <div class="wrap" id="main">
+  <div class="bars">
+    <div class="nearbar">
+      <button type="button" class="near-btn" id="near-btn">
+        <svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-480q33 0 56.5-23.5T560-560q0-33-23.5-56.5T480-640q-33 0-56.5 23.5T400-560q0 33 23.5 56.5T480-480Zm0 294q122-112 181-203.5T720-552q0-109-69.5-178.5T480-800q-101 0-170.5 69.5T240-552q0 71 59 162.5T480-186Zm0 106Q319-217 239.5-334.5T160-552q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 100-79.5 217.5T480-80Zm0-480Z"/></svg>
+        <span data-k="nearbtn">Near me</span>
+      </button>
+      <!-- One button each, cycling on every press and showing where it now
+           stands: two languages, three appearance settings. -->
+      <button type="button" class="near-btn set-btn" id="lang-btn"></button>
+      <button type="button" class="near-btn set-btn" id="theme-btn"></button>
+      <button type="button" class="near-btn set-btn" id="set-btn">
+        <svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm112-260q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Z"/></svg>
+      </button>
+    </div>
+  </div>
 
   <header class="masthead">
-    <div class="bars">
-      <div class="langbar" role="group" aria-label="Language / שפה">
-        <span class="bar-icon" aria-hidden="true"><svg viewBox="0 -960 960 960" fill="currentColor"><path d="m475-80 185-480h79L924-80h-65l-45-117H584L539-80h-64ZM162-201l-42-42 201-201q-51-53-85.5-107.5T183-660h65q16 43 43.5 85t72.5 88q46-48 85-117.5T505-740H40v-60h290v-80h60v80h290v60H567q-17 78-61.5 159.5T406-443l102 104-24 63-121-125-201 200Zm443-51h188l-94-248-94 248Z"/></svg></span>
-        <button type="button" class="lang-btn is-on" data-lang="en" lang="en">EN</button>
-        <button type="button" class="lang-btn" data-lang="he" lang="he">עב</button>
-      </div>
-      <div class="themebar" role="group" aria-label="Light or dark / בהיר או כהה">
-        <button type="button" class="theme-btn" data-theme-set="auto"><svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M310-305h55l37-109h159l38 109h53L505-697h-48L310-305Zm107-157 61-163h5l62 163H417Zm64 433L346-160H160v-186L26-480l134-134v-186h186l135-134 133 134h186v186l134 134-134 134v186H614L481-29Zm0-84 108-107h151v-151l109-109-109-109v-151H589L481-849 371-740H220v151L111-480l109 109v151h150l111 107Zm0-368Z"/></svg></button>
-        <button type="button" class="theme-btn" data-theme-set="light"><svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M579-381q41-41 41-99t-41-99q-41-41-99-41t-99 41q-41 41-41 99t41 99q41 41 99 41t99-41Zm-240.5 42.5Q280-397 280-480t58.5-141.5Q397-680 480-680t141.5 58.5Q680-563 680-480t-58.5 141.5Q563-280 480-280t-141.5-58.5ZM200-450H40v-60h160v60Zm720 0H760v-60h160v60ZM450-760v-160h60v160h-60Zm0 720v-160h60v160h-60ZM262-658l-100-97 43-44 96 100-39 41Zm494 496-98-100 41-41 99 98-42 43Zm-99-537 98-99 44 42-99 98-43-41ZM162-205l99-98 42 42-98 99-43-43Zm318-275Z"/></svg></button>
-        <button type="button" class="theme-btn" data-theme-set="dark"><svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-120q-150 0-255-105T120-480q0-150 105-255t255-105q8 0 17 .5t23 1.5q-36 32-56 79t-20 99q0 90 63 153t153 63q52 0 99-18.5t79-51.5q1 12 1.5 19.5t.5 14.5q0 150-105 255T480-120Zm0-60q109 0 190-67.5T771-406q-25 11-53.67 16.5Q688.67-384 660-384q-114.69 0-195.34-80.66Q384-545.31 384-660q0-24 5-51.5t18-62.5q-98 27-162.5 109.5T180-480q0 125 87.5 212.5T480-180Zm-4-297Z"/></svg></button>
-      </div>
-      <div class="nearbar">
-        <button type="button" class="near-btn" id="near-btn">
-          <svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-480q33 0 56.5-23.5T560-560q0-33-23.5-56.5T480-640q-33 0-56.5 23.5T400-560q0 33 23.5 56.5T480-480Zm0 294q122-112 181-203.5T720-552q0-109-69.5-178.5T480-800q-101 0-170.5 69.5T240-552q0 71 59 162.5T480-186Zm0 106Q319-217 239.5-334.5T160-552q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 100-79.5 217.5T480-80Zm0-480Z"/></svg>
-          <span data-k="nearbtn">Near me</span>
-        </button>
-        <button type="button" class="near-btn" id="set-btn" style="background:none;border:1px solid var(--rule);color:inherit">
-          <svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm112-260q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Z"/></svg>
-          <span id="set-btn-label"></span>
-        </button>
-      </div>
-    </div>
     <div class="now" id="now" hidden>
       <span class="now-big" id="now-big"></span>
       <span class="now-text" id="now-text"></span>
@@ -1171,7 +1177,8 @@
       </button>
       <span class="app-full-note" id="app-full-note" data-k="appfull-note">Booking numbers and confirmations, for the four of us. Sign in once with a code sent to your email; after that it works with no signal.</span>
     </p>
-    <section class="near" id="set-panel" hidden>
+    <div class="set-back" id="set-back" hidden>
+    <section class="near" id="set-panel" role="dialog" aria-modal="true" aria-labelledby="set-title">
       <div class="near-head">
         <h2 id="set-title"></h2>
         <button type="button" class="near-close" id="set-close" aria-label="Close">&times;</button>
@@ -1180,6 +1187,7 @@
       <div class="set-row" id="set-source"></div>
       <p class="set-hint" id="set-source-hint"></p>
     </section>
+    </div>
     <section class="near" id="near-panel" hidden>
       <div class="near-head">
         <h2 data-k="near-title">What is near you</h2>
@@ -1188,6 +1196,7 @@
       <p class="near-status" id="near-status" aria-live="polite"></p>
       <ol class="near-list" id="near-list"></ol>
       <h3 class="eat-head" id="eat-head" hidden></h3>
+      <div class="eat-cats" id="eat-areas" hidden></div>
       <div class="eat-cats" id="eat-cats" hidden></div>
       <ol class="eat-list" id="eat-list"></ol>
       <p class="near-foot" id="eat-foot" hidden></p>
@@ -1434,6 +1443,14 @@
     return "light";
   }
 
+  /* The three appearance settings, in the order the button walks through them. */
+  var THEME_ICON = {
+    auto: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18Z" fill="currentColor" stroke="none"/></svg>',
+    light: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.4v2.6M12 19v2.6M2.4 12h2.6M19 12h2.6M5.2 5.2l1.9 1.9M16.9 16.9l1.9 1.9M18.8 5.2l-1.9 1.9M7.1 16.9l-1.9 1.9"/></svg>',
+    dark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.3A8.8 8.8 0 0 1 9.7 3.5a8.8 8.8 0 1 0 10.8 10.8Z"/></svg>'
+  };
+  var THEME_NEXT = { auto: "light", light: "dark", dark: "auto" };
+
   function applyTheme() {
     var root = document.documentElement;
     if (THEME === "auto") {
@@ -1452,11 +1469,14 @@
     }
     if (meta) meta.setAttribute("content", dark ? "#0F141A" : "#E9ECEF");
 
-    var tb = document.querySelectorAll(".theme-btn");
-    for (var ti = 0; ti < tb.length; ti++) {
-      var on = tb[ti].dataset.themeSet === THEME;
-      tb[ti].classList.toggle("is-on", on);
-      tb[ti].setAttribute("aria-pressed", on ? "true" : "false");
+    var tbtn = document.getElementById("theme-btn");
+    if (tbtn) {
+      tbtn.innerHTML = THEME === "light" ? THEME_ICON.light
+                     : THEME === "dark" ? THEME_ICON.dark : THEME_ICON.auto;
+      var label = tx(THEME === "light" ? UI.themeLight
+                   : THEME === "dark" ? UI.themeDark : UI.themeAuto);
+      tbtn.setAttribute("aria-label", label);
+      tbtn.title = label;
     }
 
     /* Tell the app which scheme won, so the status bar and the area behind the
@@ -1493,7 +1513,7 @@
      looking at" has a single answer. Android carries it as versionName and iOS
      as MARKETING_VERSION; both keep a separate build counter that only ever
      rises, because neither platform will install a build that goes backwards. */
-  var VERSION = "1.2.10";
+  var VERSION = "1.2.15";
 
   /* The private build carries every booking reference and its PIN, which together
      are enough to cancel a reservation on Booking.com without logging in. The
@@ -1664,6 +1684,7 @@
        of the picture — many more voices, kinder scores, every language. */
     eTitle: t("Where to eat", "\u05d0\u05d9\u05e4\u05d4 \u05dc\u05d0\u05db\u05d5\u05dc"),
     eAll: t("All", "\u05d4\u05db\u05d5\u05dc"),
+    eBrowse: t("Not there yet — pick a city to read its list.", "\u05e2\u05d3\u05d9\u05d9\u05df \u05dc\u05d0 \u05e9\u05dd \u2014 \u05d1\u05d7\u05e8\u05d5 \u05e2\u05d9\u05e8 \u05db\u05d3\u05d9 \u05dc\u05e8\u05d0\u05d5\u05ea \u05d0\u05ea \u05d4\u05e8\u05e9\u05d9\u05de\u05d4 \u05e9\u05dc\u05d4."),
     eNone: t("Nothing of that kind nearby. The map buttons below search live.", "\u05d0\u05d9\u05df \u05de\u05d6\u05d4 \u05d1\u05e1\u05d1\u05d9\u05d1\u05d4. \u05db\u05e4\u05ea\u05d5\u05e8\u05d9 \u05d4\u05de\u05e4\u05d4 \u05dc\u05de\u05d8\u05d4 \u05de\u05d7\u05e4\u05e9\u05d9\u05dd \u05d1\u05e9\u05d9\u05d3\u05d5\u05e8 \u05d7\u05d9."),
     eTab: t("Tabelog", "\u05d8\u05d0\u05d1\u05dc\u05d5\u05d2"),
     eGoo: t("Google", "\u05d2\u05d5\u05d2\u05dc"),
@@ -1915,26 +1936,17 @@
     }
     document.documentElement.setAttribute("lang", LANG === "he" ? "he" : "en");
     document.documentElement.setAttribute("dir", LANG === "he" ? "rtl" : "ltr");
-    var btns = document.querySelectorAll(".lang-btn");
-    for (var j = 0; j < btns.length; j++) {
-      btns[j].classList.toggle("is-on", btns[j].dataset.lang === LANG);
-      var langName = tx(btns[j].dataset.lang === "he" ? UI.langHe : UI.langEn);
-      btns[j].setAttribute("aria-label", langName);
-      btns[j].title = langName;
+    var lbtn = document.getElementById("lang-btn");
+    if (lbtn) {
+      /* The button says which language the page is in, and switches to the
+         other one. Two languages need no menu. */
+      lbtn.textContent = LANG === "he" ? "\u05e2\u05d1" : "EN";
+      lbtn.setAttribute("lang", LANG === "he" ? "he" : "en");
+      var langName = tx(LANG === "he" ? UI.langEn : UI.langHe);
+      lbtn.setAttribute("aria-label", langName);
+      lbtn.title = langName;
     }
-    nameThemeButtons();
-  }
-
-  /* The theme buttons are icons; this is what a screen reader and a tooltip say. */
-  function nameThemeButtons() {
-    var names = { auto: UI.themeAuto, light: UI.themeLight, dark: UI.themeDark };
-    var tb = document.querySelectorAll(".theme-btn");
-    for (var i = 0; i < tb.length; i++) {
-      var name = tx(names[tb[i].dataset.themeSet]);
-      if (!name) continue;
-      tb[i].setAttribute("aria-label", name);
-      tb[i].title = name;
-    }
+    applyTheme();
   }
 
   function setLang(next) {
@@ -4759,7 +4771,9 @@
       hyaku: true,
       g: 4.3, gn: 2152,
       en: "Six seats, no shop sign, one bowl: thin noodles in a clear duck-and-chicken broth nearer consomm\u00e9 than ramen. Queue, or don't eat.",
-      he: "\u05e9\u05d9\u05e9\u05d4 \u05de\u05e7\u05d5\u05de\u05d5\u05ea, \u05d1\u05dc\u05d9 \u05e9\u05dc\u05d8, \u05de\u05e0\u05d4 \u05d0\u05d7\u05ea: \u05e0\u05d5\u05d3\u05dc\u05e1 \u05d3\u05e7\u05d9\u05dd \u05d1\u05de\u05e8\u05e7 \u05d1\u05e8\u05d5\u05d5\u05d6-\u05e2\u05d5\u05e3 \u05e6\u05dc\u05d5\u05dc \u05e9\u05d3\u05d5\u05de\u05d4 \u05d9\u05d5\u05ea\u05e8 \u05dc\u05e7\u05d5\u05e0\u05e1\u05d5\u05de\u05d4 \u05de\u05dc\u05e8\u05d0\u05de\u05df. \u05d0\u05d5 \u05e9\u05de\u05d7\u05db\u05d9\u05dd \u05d1\u05ea\u05d5\u05e8, \u05d0\u05d5 \u05e9\u05dc\u05d0 \u05d0\u05d5\u05db\u05dc\u05d9\u05dd." },
+      he: "\u05e9\u05d9\u05e9\u05d4 \u05de\u05e7\u05d5\u05de\u05d5\u05ea, \u05d1\u05dc\u05d9 \u05e9\u05dc\u05d8, \u05de\u05e0\u05d4 \u05d0\u05d7\u05ea: \u05e0\u05d5\u05d3\u05dc\u05e1 \u05d3\u05e7\u05d9\u05dd \u05d1\u05de\u05e8\u05e7 \u05d1\u05e8\u05d5\u05d5\u05d6-\u05e2\u05d5\u05e3 \u05e6\u05dc\u05d5\u05dc \u05e9\u05d3\u05d5\u05de\u05d4 \u05d9\u05d5\u05ea\u05e8 \u05dc\u05e7\u05d5\u05e0\u05e1\u05d5\u05de\u05d4 \u05de\u05dc\u05e8\u05d0\u05de\u05df. \u05d0\u05d5 \u05e9\u05de\u05d7\u05db\u05d9\u05dd \u05d1\u05ea\u05d5\u05e8, \u05d0\u05d5 \u05e9\u05dc\u05d0 \u05d0\u05d5\u05db\u05dc\u05d9\u05dd.",
+      jaSay: "Japanese reviewers describe an amber-gold bowl that arrives looking the same perfect way every time, and point out that the owner cooked French for 36 years at a Kyoto hotel; the top review tag is Michelin",
+      jaHe: "\u05d4\u05de\u05d1\u05e7\u05e8\u05d9\u05dd \u05d4\u05d9\u05e4\u05e0\u05d9\u05dd \u05de\u05ea\u05d0\u05e8\u05d9\u05dd \u05e7\u05e2\u05e8\u05d4 \u05d1\u05d2\u05d5\u05df \u05e2\u05e0\u05d1\u05e8-\u05d6\u05d4\u05d1 \u05e9\u05de\u05d2\u05d9\u05e2\u05d4 \u05e0\u05e8\u05d0\u05d9\u05ea \u05de\u05d5\u05e9\u05dc\u05de\u05ea \u05d1\u05d3\u05d9\u05d5\u05e7 \u05d0\u05d5\u05ea\u05d5 \u05d3\u05d1\u05e8 \u05d1\u05db\u05dc \u05e4\u05e2\u05dd, \u05d5\u05de\u05e6\u05d9\u05d9\u05e0\u05d9\u05dd \u05e9\u05d4\u05e9\u05e3 \u05d1\u05d9\u05e9\u05dc \u05e6\u05e8\u05e4\u05ea\u05d9 36 \u05e9\u05e0\u05d4 \u05d1\u05de\u05dc\u05d5\u05df \u05d1\u05e7\u05d9\u05d5\u05d8\u05d5; \u05d4\u05ea\u05d2 \u05d4\u05de\u05d5\u05d1\u05d9\u05dc \u05d1\u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea \u05d4\u05d5\u05d0 \u05de\u05d9\u05e9\u05dc\u05df" },
     { n: "Mensho Ginzasa",
       ja: "\u9eba\u51e6 \u9280\u7b39",
       area: "tokyo",
@@ -4768,7 +4782,9 @@
       hyaku: true,
       g: 4.1, gn: 1016,
       en: "Plain little shop behind Ginza, known for a sea-bream ball in the bowl and a rice course after it.",
-      he: "\u05d7\u05e0\u05d5\u05ea \u05e7\u05d8\u05e0\u05d4 \u05d5\u05e4\u05e9\u05d5\u05d8\u05d4 \u05de\u05d0\u05d7\u05d5\u05e8\u05d9 \u05d2\u05d9\u05e0\u05d6\u05d4, \u05de\u05d5\u05db\u05e8\u05ea \u05d1\u05db\u05d5\u05e4\u05ea\u05ea \u05d3\u05d2 \u05e0\u05e1\u05d9\u05db\u05d4 \u05e9\u05d1\u05e7\u05e2\u05e8\u05d4 \u05d5\u05d1\u05de\u05e0\u05ea \u05d0\u05d5\u05e8\u05d6 \u05e9\u05d0\u05d7\u05e8\u05d9\u05d4." },
+      he: "\u05d7\u05e0\u05d5\u05ea \u05e7\u05d8\u05e0\u05d4 \u05d5\u05e4\u05e9\u05d5\u05d8\u05d4 \u05de\u05d0\u05d7\u05d5\u05e8\u05d9 \u05d2\u05d9\u05e0\u05d6\u05d4, \u05de\u05d5\u05db\u05e8\u05ea \u05d1\u05db\u05d5\u05e4\u05ea\u05ea \u05d3\u05d2 \u05e0\u05e1\u05d9\u05db\u05d4 \u05e9\u05d1\u05e7\u05e2\u05e8\u05d4 \u05d5\u05d1\u05de\u05e0\u05ea \u05d0\u05d5\u05e8\u05d6 \u05e9\u05d0\u05d7\u05e8\u05d9\u05d4.",
+      jaSay: "reviews call it a queue shop for fish-stock shio ramen, and the sea-bream rice that comes with it is tagged in 248 of them; several say to keep room for finishing it as tea-rice",
+      jaHe: "\u05d4\u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea \u05e7\u05d5\u05e8\u05d0\u05d5\u05ea \u05dc\u05d4 \u05d7\u05e0\u05d5\u05ea \u05ea\u05d5\u05e8 \u05dc\u05e8\u05d0\u05de\u05df \u05e9\u05d9\u05d5 \u05e2\u05dc \u05e6\u05d9\u05e8 \u05d3\u05d2\u05d9\u05dd, \u05d5\u05d0\u05d5\u05e8\u05d6 \u05d4\u05d3\u05e0\u05d9\u05e1 \u05e9\u05de\u05d2\u05d9\u05e2 \u05d0\u05d9\u05ea\u05d5 \u05de\u05ea\u05d5\u05d9\u05d2 \u05d1-248 \u05de\u05d4\u05df; \u05db\u05de\u05d4 \u05d0\u05d5\u05de\u05e8\u05d9\u05dd \u05dc\u05e9\u05de\u05d5\u05e8 \u05de\u05e7\u05d5\u05dd \u05dc\u05e1\u05d9\u05d9\u05dd \u05d0\u05d5\u05ea\u05d5 \u05db\u05d0\u05d5\u05e8\u05d6 \u05d1\u05ea\u05d4" },
     { n: "Rokurinsha",
       ja: "\u516d\u5398\u820e \u6771\u4eac\u30e9\u30fc\u30e1\u30f3\u30b9\u30c8\u30ea\u30fc\u30c8\u5e97",
       area: "tokyo",
@@ -4777,7 +4793,9 @@
       hyaku: true,
       g: 4.1, gn: 5332,
       en: "Thick dipping noodles in the basement of Tokyo Station. The queue is permanent and the location is unbeatable on a travel day.",
-      he: "\u05e6\u05d5\u05e7\u05de\u05df \u05e1\u05de\u05d9\u05da \u05d1\u05de\u05e8\u05ea\u05e3 \u05e9\u05dc \u05ea\u05d7\u05e0\u05ea \u05d8\u05d5\u05e7\u05d9\u05d5. \u05d4\u05ea\u05d5\u05e8 \u05e7\u05d1\u05d5\u05e2, \u05d5\u05d4\u05de\u05e7\u05d5\u05dd \u05d1\u05dc\u05ea\u05d9 \u05de\u05e0\u05d5\u05e6\u05d7 \u05d1\u05d9\u05d5\u05dd \u05e9\u05dc \u05e8\u05db\u05d1\u05d5\u05ea." },
+      he: "\u05e6\u05d5\u05e7\u05de\u05df \u05e1\u05de\u05d9\u05da \u05d1\u05de\u05e8\u05ea\u05e3 \u05e9\u05dc \u05ea\u05d7\u05e0\u05ea \u05d8\u05d5\u05e7\u05d9\u05d5. \u05d4\u05ea\u05d5\u05e8 \u05e7\u05d1\u05d5\u05e2, \u05d5\u05d4\u05de\u05e7\u05d5\u05dd \u05d1\u05dc\u05ea\u05d9 \u05de\u05e0\u05d5\u05e6\u05d7 \u05d1\u05d9\u05d5\u05dd \u05e9\u05dc \u05e8\u05db\u05d1\u05d5\u05ea.",
+      jaSay: "Google's summary of the reviews is blunt \u2014 the tsukemen shop with the queue on Tokyo Ramen Street; it opens at 07:30, and going early instead of waiting an hour is the advice repeated most",
+      jaHe: "\u05d4\u05ea\u05e7\u05e6\u05d9\u05e8 \u05e9\u05dc \u05d2\u05d5\u05d2\u05dc \u05dc\u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea \u05d9\u05e9\u05d9\u05e8 \u2014 \u05d7\u05e0\u05d5\u05ea \u05d4\u05e6\u05d5\u05e7\u05de\u05df \u05e2\u05dd \u05d4\u05ea\u05d5\u05e8 \u05d1\u05e8\u05d7\u05d5\u05d1 \u05d4\u05e8\u05d0\u05de\u05df \u05e9\u05dc \u05d8\u05d5\u05e7\u05d9\u05d5; \u05e0\u05e4\u05ea\u05d7\u05ea \u05d1-07:30, \u05d5\u05d4\u05e2\u05e6\u05d4 \u05e9\u05d7\u05d5\u05d6\u05e8\u05ea \u05d4\u05d9\u05d0 \u05dc\u05d4\u05d2\u05d9\u05e2 \u05de\u05d5\u05e7\u05d3\u05dd \u05d1\u05de\u05e7\u05d5\u05dd \u05dc\u05d7\u05db\u05d5\u05ea \u05e9\u05e2\u05d4" },
     { n: "Isehiro Kyobashi",
       ja: "\u4f0a\u52e2\u5ee3 \u4eac\u6a4b\u672c\u5e97",
       area: "tokyo",
@@ -4843,7 +4861,9 @@
       g: 4.7, gn: 322,
       yen: "\u00a512,000 the set course",
       en: "Grilled beef in Ningyocho, private rooms, and one of the few places licensed to serve it raw. The nearest thing to Korean barbecue that Tabelog ranks here.",
-      he: "\u05d1\u05e9\u05e8 \u05e2\u05dc \u05d4\u05d0\u05e9 \u05d1\u05e0\u05d9\u05e0\u05d2\u05d9\u05d5\u05de\u05d0\u05e6'\u05d5, \u05d7\u05d3\u05e8\u05d9\u05dd \u05e4\u05e8\u05d8\u05d9\u05d9\u05dd, \u05d5\u05d0\u05d7\u05d3 \u05d4\u05de\u05e7\u05d5\u05de\u05d5\u05ea \u05d4\u05de\u05e2\u05d8\u05d9\u05dd \u05e2\u05dd \u05e8\u05d9\u05e9\u05d9\u05d5\u05df \u05dc\u05d4\u05d2\u05d9\u05e9 \u05d0\u05d5\u05ea\u05d5 \u05e0\u05d0. \u05d4\u05d3\u05d1\u05e8 \u05d4\u05e7\u05e8\u05d5\u05d1 \u05d1\u05d9\u05d5\u05ea\u05e8 \u05dc\u05e2\u05dc-\u05d4\u05d0\u05e9 \u05e7\u05d5\u05e8\u05d9\u05d0\u05e0\u05d9 \u05e9\u05d8\u05d0\u05d1\u05dc\u05d5\u05d2 \u05de\u05d3\u05e8\u05d2 \u05db\u05d0\u05df." },
+      he: "\u05d1\u05e9\u05e8 \u05e2\u05dc \u05d4\u05d0\u05e9 \u05d1\u05e0\u05d9\u05e0\u05d2\u05d9\u05d5\u05de\u05d0\u05e6'\u05d5, \u05d7\u05d3\u05e8\u05d9\u05dd \u05e4\u05e8\u05d8\u05d9\u05d9\u05dd, \u05d5\u05d0\u05d7\u05d3 \u05d4\u05de\u05e7\u05d5\u05de\u05d5\u05ea \u05d4\u05de\u05e2\u05d8\u05d9\u05dd \u05e2\u05dd \u05e8\u05d9\u05e9\u05d9\u05d5\u05df \u05dc\u05d4\u05d2\u05d9\u05e9 \u05d0\u05d5\u05ea\u05d5 \u05e0\u05d0. \u05d4\u05d3\u05d1\u05e8 \u05d4\u05e7\u05e8\u05d5\u05d1 \u05d1\u05d9\u05d5\u05ea\u05e8 \u05dc\u05e2\u05dc-\u05d4\u05d0\u05e9 \u05e7\u05d5\u05e8\u05d9\u05d0\u05e0\u05d9 \u05e9\u05d8\u05d0\u05d1\u05dc\u05d5\u05d2 \u05de\u05d3\u05e8\u05d2 \u05db\u05d0\u05df.",
+      jaSay: "4.7 from 322 reviews, the highest yakiniku score on this list; the house pushes raw beef \u2014 sirloin yukke, salted or in tare \u2014 and the reviews follow it, with the private rooms mentioned nearly as often",
+      jaHe: "4.7 \u05de-322 \u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea, \u05d4\u05d3\u05d9\u05e8\u05d5\u05d2 \u05d4\u05d2\u05d1\u05d5\u05d4 \u05d1\u05d9\u05d5\u05ea\u05e8 \u05dc\u05d9\u05d0\u05e7\u05d9\u05e0\u05d9\u05e7\u05d5 \u05d1\u05e8\u05e9\u05d9\u05de\u05d4; \u05d4\u05d1\u05d9\u05ea \u05de\u05e7\u05d3\u05dd \u05d1\u05e9\u05e8 \u05e0\u05d0 \u2014 \u05d9\u05d5\u05e7\u05d4 \u05de\u05e1\u05d9\u05e0\u05d8\u05d4, \u05d1\u05de\u05dc\u05d7 \u05d0\u05d5 \u05d1\u05e8\u05d5\u05d8\u05d1 \u2014 \u05d5\u05d4\u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea \u05d4\u05d5\u05dc\u05db\u05d5\u05ea \u05d0\u05d7\u05e8\u05d9\u05d5, \u05db\u05e9\u05d4\u05d7\u05d3\u05e8\u05d9\u05dd \u05d4\u05e4\u05e8\u05d8\u05d9\u05d9\u05dd \u05de\u05d5\u05d6\u05db\u05e8\u05d9\u05dd \u05db\u05de\u05e2\u05d8 \u05d1\u05d0\u05d5\u05ea\u05d4 \u05ea\u05db\u05d9\u05e4\u05d5\u05ea" },
     { n: "Trattoria Tsukiji Paradiso",
       ja: "\u30c8\u30e9\u30c3\u30c8\u30ea\u30a2 \u7bc9\u5730 \u30d1\u30e9\u30c7\u30a3\u30fc\u30be\uff01",
       area: "tokyo",
@@ -4876,7 +4896,316 @@
       en: "Ginza's 1936 coffee house: revolving door, waistcoats, siphon coffee and apple pie. Opens at eight, which solves breakfast.",
       he: "\u05d1\u05d9\u05ea \u05d4\u05e7\u05e4\u05d4 \u05e9\u05dc \u05d2\u05d9\u05e0\u05d6\u05d4 \u05de-1936: \u05d3\u05dc\u05ea \u05de\u05e1\u05ea\u05d5\u05d1\u05d1\u05ea, \u05de\u05dc\u05e6\u05e8\u05d9\u05dd \u05d1\u05d7\u05d6\u05d9\u05d5\u05ea, \u05e7\u05e4\u05d4 \u05e1\u05d9\u05e4\u05d5\u05df \u05d5\u05e4\u05d0\u05d9 \u05ea\u05e4\u05d5\u05d7\u05d9\u05dd. \u05e0\u05e4\u05ea\u05d7 \u05d1\u05e9\u05de\u05d5\u05e0\u05d4, \u05d5\u05d6\u05d4 \u05e4\u05d5\u05ea\u05e8 \u05d0\u05ea \u05d4\u05d1\u05d5\u05e7\u05e8.",
       jaSay: "apple pie in 191 reviews and the revolving door in 97; the morning set is what the regulars come for",
-      jaHe: "\u05e4\u05d0\u05d9 \u05ea\u05e4\u05d5\u05d7\u05d9\u05dd \u05d1-191 \u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea \u05d5\u05d4\u05d3\u05dc\u05ea \u05d4\u05de\u05e1\u05ea\u05d5\u05d1\u05d1\u05ea \u05d1-97; \u05d4\u05e7\u05d1\u05d5\u05e2\u05d9\u05dd \u05d1\u05d0\u05d9\u05dd \u05d1\u05e9\u05d1\u05d9\u05dc \u05de\u05e0\u05ea \u05d4\u05d1\u05d5\u05e7\u05e8" }
+      jaHe: "\u05e4\u05d0\u05d9 \u05ea\u05e4\u05d5\u05d7\u05d9\u05dd \u05d1-191 \u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea \u05d5\u05d4\u05d3\u05dc\u05ea \u05d4\u05de\u05e1\u05ea\u05d5\u05d1\u05d1\u05ea \u05d1-97; \u05d4\u05e7\u05d1\u05d5\u05e2\u05d9\u05dd \u05d1\u05d0\u05d9\u05dd \u05d1\u05e9\u05d1\u05d9\u05dc \u05de\u05e0\u05ea \u05d4\u05d1\u05d5\u05e7\u05e8" },
+    { n: "Ajinoya",
+      ja: "\u5473\u4e43\u5bb6 \u672c\u5e97",
+      area: "osaka",
+      cat: "okonomiyaki",
+      at: [34.66808, 135.50103],
+      g: 4.2, gn: 3952,
+      en: "Okonomiyaki on the lane behind Hozenji temple, two minutes from Dotonbori. Nearly four thousand ratings and still a local room upstairs.",
+      he: "\u05d0\u05d5\u05e7\u05d5\u05e0\u05d5\u05de\u05d9\u05d0\u05e7\u05d9 \u05d1\u05e1\u05de\u05d8\u05d4 \u05e9\u05de\u05d0\u05d7\u05d5\u05e8\u05d9 \u05de\u05e7\u05d3\u05e9 \u05d4\u05d5\u05d6\u05e0\u05d2'\u05d9, \u05e9\u05ea\u05d9 \u05d3\u05e7\u05d5\u05ea \u05de\u05d3\u05d5\u05d8\u05d5\u05e0\u05d1\u05d5\u05e8\u05d9. \u05db\u05de\u05e2\u05d8 \u05d0\u05e8\u05d1\u05e2\u05ea \u05d0\u05dc\u05e4\u05d9\u05dd \u05d3\u05d9\u05e8\u05d5\u05d2\u05d9\u05dd, \u05d5\u05e2\u05d3\u05d9\u05d9\u05df \u05d7\u05d3\u05e8 \u05de\u05e7\u05d5\u05de\u05d9 \u05d1\u05e7\u05d5\u05de\u05d4 \u05e9\u05e0\u05d9\u05d9\u05d4.",
+      jaSay: "the review tags are yakisoba 105, Michelin 69 and queue 65; reviewers warn that you order everything at the start and only drinks can be added later, which is why the tables turn fast",
+      jaHe: "\u05ea\u05d2\u05d9 \u05d4\u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea \u05d4\u05dd \u05d9\u05d0\u05e7\u05d9\u05e1\u05d5\u05d1\u05d4 105, \u05de\u05d9\u05e9\u05dc\u05df 69 \u05d5\u05ea\u05d5\u05e8 65; \u05d4\u05de\u05d1\u05e7\u05e8\u05d9\u05dd \u05de\u05d6\u05d4\u05d9\u05e8\u05d9\u05dd \u05e9\u05de\u05d6\u05de\u05d9\u05e0\u05d9\u05dd \u05d4\u05db\u05dc \u05d1\u05d4\u05ea\u05d7\u05dc\u05d4 \u05d5\u05e8\u05e7 \u05e9\u05ea\u05d9\u05d9\u05d4 \u05d0\u05e4\u05e9\u05e8 \u05dc\u05d4\u05d5\u05e1\u05d9\u05e3 \u05d0\u05d7\u05e8 \u05db\u05da, \u05d5\u05dc\u05db\u05df \u05d4\u05e9\u05d5\u05dc\u05d7\u05e0\u05d5\u05ea \u05de\u05ea\u05d7\u05dc\u05e4\u05d9\u05dd \u05de\u05d4\u05e8" },
+    { n: "Mizuno",
+      ja: "\u304a\u597d\u307f\u713c \u7f8e\u6d25\u306e",
+      area: "osaka",
+      cat: "okonomiyaki",
+      at: [34.66825, 135.50313],
+      hyaku: true,
+      g: 3.8, gn: 3250,
+      en: "On Dotonbori itself, in the Michelin guide, and the queue is the price. The yamaimo batter is what it is known for.",
+      he: "\u05e2\u05dc \u05d3\u05d5\u05d8\u05d5\u05e0\u05d1\u05d5\u05e8\u05d9 \u05e2\u05e6\u05de\u05d4, \u05de\u05d5\u05e4\u05d9\u05e2\u05d4 \u05d1\u05de\u05d3\u05e8\u05d9\u05da \u05de\u05d9\u05e9\u05dc\u05df, \u05d5\u05d4\u05ea\u05d5\u05e8 \u05d4\u05d5\u05d0 \u05d4\u05de\u05d7\u05d9\u05e8. \u05d4\u05d1\u05dc\u05d9\u05dc\u05d4 \u05e2\u05dd \u05d4\u05d9\u05d0\u05de\u05d0\u05d9\u05de\u05d5 \u05d4\u05d9\u05d0 \u05de\u05d4 \u05e9\u05d4\u05d9\u05d0 \u05de\u05d5\u05db\u05e8\u05ea \u05d1\u05d5.",
+      jaSay: "Michelin comes up in 227 reviews and the queue in 101; the scallop, prawn and pork inside are called large and properly good",
+      jaHe: "\u05de\u05d9\u05e9\u05dc\u05df \u05de\u05d5\u05d6\u05db\u05e8 \u05d1-227 \u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea \u05d5\u05d4\u05ea\u05d5\u05e8 \u05d1-101; \u05d0\u05d5\u05de\u05e8\u05d9\u05dd \u05e9\u05d4\u05e6\u05d3\u05e4\u05d5\u05ea, \u05d4\u05e9\u05e8\u05d9\u05de\u05e4\u05e1 \u05d5\u05d4\u05d7\u05d6\u05d9\u05e8 \u05e9\u05d1\u05e4\u05e0\u05d9\u05dd \u05d2\u05d3\u05d5\u05dc\u05d9\u05dd \u05d5\u05d0\u05d9\u05db\u05d5\u05ea\u05d9\u05d9\u05dd" },
+    { n: "Fukutaro",
+      ja: "\u798f\u592a\u90ce \u672c\u5e97",
+      area: "osaka",
+      cat: "okonomiyaki",
+      at: [34.66550, 135.50450],
+      hyaku: true,
+      g: 4.2, gn: 3810,
+      en: "Negiyaki as much as okonomiyaki, in Sennichimae. The one to pick when you want the Osaka plate without the Dotonbori crowd.",
+      he: "\u05e0\u05d2\u05d9\u05d9\u05d0\u05e7\u05d9 \u05dc\u05d0 \u05e4\u05d7\u05d5\u05ea \u05de\u05d0\u05d5\u05e7\u05d5\u05e0\u05d5\u05de\u05d9\u05d0\u05e7\u05d9, \u05d1\u05e1\u05e0\u05e0\u05d9\u05e6'\u05d9\u05de\u05d0\u05d4. \u05d4\u05d1\u05d7\u05d9\u05e8\u05d4 \u05db\u05e9\u05e8\u05d5\u05e6\u05d9\u05dd \u05d0\u05ea \u05d4\u05de\u05e0\u05d4 \u05d4\u05d0\u05d5\u05e1\u05e7\u05d0\u05d9\u05ea \u05d1\u05dc\u05d9 \u05d4\u05d4\u05de\u05d5\u05df \u05e9\u05dc \u05d3\u05d5\u05d8\u05d5\u05e0\u05d1\u05d5\u05e8\u05d9.",
+      jaSay: "yakisoba in 96 reviews; one table timed it \u2014 beer at once, yakisoba after ten minutes, negiyaki after fifteen",
+      jaHe: "\u05d9\u05e7\u05d9\u05e1\u05d5\u05d1\u05d4 \u05d1-96 \u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea; \u05de\u05d1\u05e7\u05e8 \u05d0\u05d7\u05d3 \u05de\u05d3\u05d3: \u05d4\u05d1\u05d9\u05e8\u05d4 \u05de\u05d9\u05d3, \u05d4\u05d9\u05e7\u05d9\u05e1\u05d5\u05d1\u05d4 \u05d0\u05d7\u05e8\u05d9 \u05e2\u05e9\u05e8 \u05d3\u05e7\u05d5\u05ea, \u05d4\u05e0\u05d2\u05d9\u05d9\u05d0\u05e7\u05d9 \u05d0\u05d7\u05e8\u05d9 \u05d7\u05de\u05e9-\u05e2\u05e9\u05e8\u05d4" },
+    { n: "Menya Jyoroku",
+      ja: "\u9eba\u5c4b \u4e08\u516d",
+      area: "osaka",
+      cat: "ramen",
+      at: [34.66363, 135.50475],
+      hyaku: true,
+      g: 3.8, gn: 1711,
+      en: "A counter and nothing else, south of Namba. Takaida-style soy ramen, dark to look at and lighter than it looks.",
+      he: "\u05d1\u05e8 \u05d5\u05e9\u05d5\u05dd \u05d3\u05d1\u05e8 \u05d0\u05d7\u05e8, \u05d3\u05e8\u05d5\u05de\u05d9\u05ea \u05dc\u05e0\u05de\u05d1\u05d4. \u05e8\u05d0\u05de\u05df \u05e1\u05d5\u05d9\u05d4 \u05d1\u05e1\u05d8\u05d9\u05dc \u05d8\u05e7\u05d0\u05d9\u05d3\u05d4, \u05db\u05d4\u05d4 \u05dc\u05de\u05e8\u05d0\u05d4 \u05d5\u05e7\u05dc \u05d9\u05d5\u05ea\u05e8 \u05de\u05de\u05d4 \u05e9\u05e0\u05e8\u05d0\u05d4.",
+      jaSay: "\u201cone sip and it is far less salty than it looks \u2014 chicken savour and a soft soy sourness\u201d; the extra-meat order comes up repeatedly",
+      jaHe: "\u05db\u05d5\u05ea\u05d1\u05d9\u05dd: \u05dc\u05d2\u05d9\u05de\u05d4 \u05d0\u05d7\u05ea \u05d5\u05d6\u05d4 \u05e4\u05d7\u05d5\u05ea \u05de\u05dc\u05d5\u05d7 \u05de\u05db\u05e4\u05d9 \u05e9\u05e0\u05e8\u05d0\u05d4 \u2014 \u05d8\u05e2\u05dd \u05e2\u05d5\u05e3 \u05d5\u05d7\u05de\u05d9\u05e6\u05d5\u05ea \u05e8\u05db\u05d4 \u05e9\u05dc \u05e1\u05d5\u05d9\u05d4" },
+    { n: "Men no Yoji",
+      ja: "\u9eba\u306e\u3088\u3046\u3058",
+      area: "osaka",
+      cat: "ramen",
+      at: [34.66825, 135.51125],
+      hyaku: true,
+      g: 4.4, gn: 1261,
+      en: "The highest-rated ramen near Namba on both counts, ten minutes east. Ticket machine at the door, so no Japanese needed.",
+      he: "\u05d4\u05e8\u05d0\u05de\u05df \u05d4\u05de\u05d3\u05d5\u05e8\u05d2 \u05d1\u05d9\u05d5\u05ea\u05e8 \u05dc\u05d9\u05d3 \u05e0\u05de\u05d1\u05d4 \u05d1\u05e9\u05ea\u05d9 \u05d4\u05de\u05d9\u05d3\u05d5\u05ea, \u05e2\u05e9\u05e8 \u05d3\u05e7\u05d5\u05ea \u05de\u05d6\u05e8\u05d7\u05d4. \u05de\u05db\u05d5\u05e0\u05ea \u05db\u05e8\u05d8\u05d9\u05e1\u05d9\u05dd \u05d1\u05db\u05e0\u05d9\u05e1\u05d4, \u05db\u05da \u05e9\u05dc\u05d0 \u05e6\u05e8\u05d9\u05da \u05d9\u05e4\u05e0\u05d9\u05ea.",
+      jaSay: "what reviewers order is the rare-chashu rice bowl and the thick chicken tsukemen; the shop notes that ordering is by ticket machine, which is why first-timers manage without Japanese",
+      jaHe: "\u05de\u05d4 \u05e9\u05d4\u05de\u05d1\u05e7\u05e8\u05d9\u05dd \u05de\u05d6\u05de\u05d9\u05e0\u05d9\u05dd \u05d6\u05d4 \u05e7\u05e2\u05e8\u05ea \u05d4\u05d0\u05d5\u05e8\u05d6 \u05e2\u05dd \u05d7\u05d6\u05d9\u05e8 \u05e0\u05d0-\u05d5\u05e8\u05d5\u05d3 \u05d5\u05d4\u05e6\u05d5\u05e7\u05de\u05df \u05e2\u05dc \u05e6\u05d9\u05e8 \u05e2\u05d5\u05e3 \u05e1\u05de\u05d9\u05da; \u05d4\u05d7\u05e0\u05d5\u05ea \u05de\u05e6\u05d9\u05d9\u05e0\u05ea \u05e9\u05d4\u05d4\u05d6\u05de\u05e0\u05d4 \u05d1\u05de\u05db\u05d5\u05e0\u05ea \u05db\u05e8\u05d8\u05d9\u05e1\u05d9\u05dd, \u05d5\u05dc\u05db\u05df \u05de\u05d9 \u05e9\u05d1\u05d0 \u05d1\u05e4\u05e2\u05dd \u05d4\u05e8\u05d0\u05e9\u05d5\u05e0\u05d4 \u05de\u05e1\u05ea\u05d3\u05e8 \u05d1\u05dc\u05d9 \u05d9\u05e4\u05e0\u05d9\u05ea" },
+    { n: "Yakiniku Horumon Sora",
+      ja: "\u713c\u8089\u30db\u30eb\u30e2\u30f3 \u7a7a \u9db4\u6a4b\u672c\u5e97",
+      area: "osaka",
+      cat: "kbbq",
+      at: [34.66563, 135.52925],
+      hyaku: true,
+      g: 4.1, gn: 2771,
+      yen: "\u00a51,100 at lunch",
+      en: "Tsuruhashi is Osaka's Korean quarter and this is its busiest grill, open since 1981. Actual Korean barbecue rather than the Japanese version.",
+      he: "\u05e6\u05d5\u05bc\u05e8\u05d5\u05bc\u05d4\u05d0\u05e9\u05d9 \u05d4\u05d9\u05d0 \u05d4\u05e8\u05d5\u05d1\u05e2 \u05d4\u05e7\u05d5\u05e8\u05d9\u05d0\u05e0\u05d9 \u05e9\u05dc \u05d0\u05d5\u05e1\u05e7\u05d4, \u05d5\u05d6\u05d5 \u05d4\u05d0\u05e9 \u05d4\u05e2\u05de\u05d5\u05e1\u05d4 \u05d1\u05d5, \u05e4\u05ea\u05d5\u05d7\u05d4 \u05de-1981. \u05e2\u05dc-\u05d4\u05d0\u05e9 \u05e7\u05d5\u05e8\u05d9\u05d0\u05e0\u05d9 \u05d0\u05de\u05d9\u05ea\u05d9, \u05dc\u05d0 \u05d4\u05d2\u05e8\u05e1\u05d4 \u05d4\u05d9\u05e4\u05e0\u05d9\u05ea.",
+      jaSay: "the queue has 118 mentions and harami 105; lunch is \u00a51,100 for loin and belly, and one reviewer warns the upstairs tables can be sticky",
+      jaHe: "\u05d4\u05ea\u05d5\u05e8 \u05de\u05d5\u05d6\u05db\u05e8 118 \u05e4\u05e2\u05dd \u05d5\u05d4\u05d4\u05e8\u05de\u05d9 105; \u05e6\u05d4\u05e8\u05d9\u05d9\u05dd \u05d4\u05d5\u05d0 1,100 \u05d9\u05df, \u05d5\u05de\u05d1\u05e7\u05e8 \u05d0\u05d7\u05d3 \u05de\u05d6\u05d4\u05d9\u05e8 \u05e9\u05d4\u05e9\u05d5\u05dc\u05d7\u05e0\u05d5\u05ea \u05dc\u05de\u05e2\u05dc\u05d4 \u05d3\u05d1\u05d9\u05e7\u05d9\u05dd" },
+    { n: "Kushikatsu Daruma",
+      ja: "\u4e32\u304b\u3064\u3060\u308b\u307e \u65b0\u4e16\u754c\u7dcf\u672c\u5e97",
+      area: "osaka",
+      cat: "katsu",
+      at: [34.65150, 135.50613],
+      g: 4.1, gn: 2150,
+      en: "Shinsekai's skewer-fry house, the original branch under the tower. One rule, posted everywhere: no double-dipping in the sauce.",
+      he: "\u05d1\u05d9\u05ea \u05d4\u05e7\u05d0\u05e6\u05d5 \u05e2\u05dc \u05e9\u05d9\u05e4\u05d5\u05d3\u05d9\u05dd \u05e9\u05dc \u05e9\u05d9\u05e0\u05e1\u05e7\u05d0\u05d9, \u05d4\u05e1\u05e0\u05d9\u05e3 \u05d4\u05de\u05e7\u05d5\u05e8\u05d9 \u05de\u05ea\u05d7\u05ea \u05dc\u05de\u05d2\u05d3\u05dc. \u05d7\u05d5\u05e7 \u05d0\u05d7\u05d3, \u05ea\u05dc\u05d5\u05d9 \u05d1\u05db\u05dc \u05de\u05e7\u05d5\u05dd: \u05d0\u05e1\u05d5\u05e8 \u05dc\u05d8\u05d1\u05d5\u05dc \u05e4\u05e2\u05de\u05d9\u05d9\u05dd \u05d1\u05e8\u05d5\u05d8\u05d1.",
+      jaSay: "the owner's own notes promise picture menus in several languages, which matches the tourist-heavy reviews",
+      jaHe: "\u05d4\u05d1\u05e2\u05dc\u05d9\u05dd \u05de\u05e4\u05e8\u05e1\u05de\u05d9\u05dd \u05ea\u05e4\u05e8\u05d9\u05d8\u05d9 \u05ea\u05de\u05d5\u05e0\u05d5\u05ea \u05d1\u05db\u05de\u05d4 \u05e9\u05e4\u05d5\u05ea, \u05de\u05d4 \u05e9\u05de\u05ea\u05d0\u05d9\u05dd \u05dc\u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea \u05e9\u05dc \u05ea\u05d9\u05d9\u05e8\u05d9\u05dd" },
+    { n: "Harukoma",
+      ja: "\u6625\u99d2 \u672c\u5e97",
+      area: "osaka",
+      cat: "sushi",
+      at: [34.70763, 135.51150],
+      g: 4.2, gn: 3825,
+      en: "Cheap, enormous sushi in the Tenjinbashi arcade, north of the centre. No reservations, no Tabelog badge, and a queue of locals anyway.",
+      he: "\u05e1\u05d5\u05e9\u05d9 \u05d6\u05d5\u05dc \u05d5\u05e2\u05e6\u05d5\u05dd \u05d1\u05e7\u05e0\u05d9\u05d5\u05df \u05d8\u05e0\u05d2'\u05d9\u05e0\u05d1\u05d0\u05e9\u05d9, \u05e6\u05e4\u05d5\u05e0\u05d9\u05ea \u05dc\u05de\u05e8\u05db\u05d6. \u05d1\u05dc\u05d9 \u05d4\u05d6\u05de\u05e0\u05d5\u05ea, \u05d1\u05dc\u05d9 \u05ea\u05d2 \u05e9\u05dc \u05d8\u05d0\u05d1\u05dc\u05d5\u05d2, \u05d5\u05ea\u05d5\u05e8 \u05e9\u05dc \u05de\u05e7\u05d5\u05de\u05d9\u05d9\u05dd \u05d1\u05db\u05dc \u05de\u05e7\u05e8\u05d4.",
+      jaSay: "queue mentioned in 195 reviews; an Osaka friend is quoted saying the cuts are huge and the rice is the real skill",
+      jaHe: "\u05d4\u05ea\u05d5\u05e8 \u05de\u05d5\u05d6\u05db\u05e8 \u05d1-195 \u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea; \u05de\u05e6\u05d8\u05d8\u05d9\u05dd \u05d7\u05d1\u05e8 \u05de\u05e7\u05d5\u05de\u05d9 \u05e9\u05d0\u05d5\u05de\u05e8 \u05e9\u05d4\u05e4\u05e8\u05d5\u05e1\u05d5\u05ea \u05e2\u05e6\u05d5\u05de\u05d5\u05ea \u05d5\u05e9\u05d4\u05d0\u05d5\u05e8\u05d6 \u05d4\u05d5\u05d0 \u05d4\u05d0\u05de\u05e0\u05d5\u05ea \u05d4\u05d0\u05de\u05d9\u05ea\u05d9\u05ea" },
+    { n: "Marufuku Coffee",
+      ja: "\u4e38\u798f\u73c8\u7432\u5e97 \u5343\u65e5\u524d\u672c\u5e97",
+      area: "osaka",
+      cat: "coffee",
+      at: [34.66750, 135.50413],
+      g: 4.1, gn: 3083,
+      en: "Since 1934, and it looks it: dark roast poured thick, copper-plate pancakes, sofa seats. Opens at eight, which solves breakfast near Namba.",
+      he: "\u05de-1934, \u05d5\u05e0\u05e8\u05d0\u05d4 \u05d1\u05d4\u05ea\u05d0\u05dd: \u05e7\u05dc\u05d9\u05d9\u05d4 \u05db\u05d4\u05d4 \u05d5\u05de\u05e8\u05d5\u05db\u05d6\u05ea, \u05e4\u05e0\u05e7\u05d9\u05d9\u05e7 \u05e2\u05dc \u05dc\u05d5\u05d7 \u05e0\u05d7\u05d5\u05e9\u05ea, \u05e1\u05e4\u05d5\u05ea. \u05e0\u05e4\u05ea\u05d7 \u05d1\u05e9\u05de\u05d5\u05e0\u05d4, \u05d5\u05d6\u05d4 \u05e4\u05d5\u05ea\u05e8 \u05d0\u05ea \u05d4\u05d1\u05d5\u05e7\u05e8 \u05dc\u05d9\u05d3 \u05e0\u05de\u05d1\u05d4.",
+      jaSay: "since 1934, and the reviews are about the deep-roast coffee and the copper-plate pancakes; the weekday morning service and the sofa seats are the other two things they name",
+      jaHe: "\u05de-1934, \u05d5\u05d4\u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea \u05e2\u05d5\u05e1\u05e7\u05d5\u05ea \u05d1\u05e7\u05e4\u05d4 \u05d1\u05e7\u05dc\u05d9\u05d9\u05d4 \u05e2\u05de\u05d5\u05e7\u05d4 \u05d5\u05d1\u05e4\u05e0\u05e7\u05d9\u05d9\u05e7 \u05e2\u05dc \u05dc\u05d5\u05d7 \u05e0\u05d7\u05d5\u05e9\u05ea; \u05e9\u05d9\u05e8\u05d5\u05ea \u05d4\u05d1\u05d5\u05e7\u05e8 \u05d1\u05d9\u05de\u05d9 \u05d7\u05d5\u05dc \u05d5\u05d4\u05de\u05d5\u05e9\u05d1\u05d9\u05dd \u05e2\u05dc \u05d4\u05e1\u05e4\u05d5\u05ea \u05d4\u05dd \u05e9\u05e0\u05d9 \u05d4\u05d3\u05d1\u05e8\u05d9\u05dd \u05d4\u05d0\u05d7\u05e8\u05d9\u05dd \u05e9\u05de\u05d5\u05d6\u05db\u05e8\u05d9\u05dd" },
+    { n: "Menya Inoichi",
+      ja: "\u9eba\u5c4b \u732a\u4e00",
+      area: "kyoto",
+      cat: "ramen",
+      at: [35.00066, 135.76511],
+      hyaku: true,
+      g: 4.4, gn: 3957,
+      en: "Dashi ramen, not pork-bone: a clear bonito-and-dried-fish broth, thin noodles, black or white soy. Tabelog top 100, one small counter, ticket machine, and a line before it opens.",
+      he: "\u05e8\u05d0\u05de\u05df \u05e2\u05dc \u05e6\u05d9\u05e8 \u05d3\u05d0\u05e9\u05d9, \u05dc\u05d0 \u05e2\u05dc \u05e2\u05e6\u05de\u05d5\u05ea \u05d7\u05d6\u05d9\u05e8: \u05de\u05e8\u05e7 \u05d1\u05d5\u05e0\u05d8\u05d5 \u05d5\u05d3\u05d2\u05d9\u05dd \u05de\u05d9\u05d5\u05d1\u05e9\u05d9\u05dd, \u05e0\u05d5\u05d3\u05dc\u05e1 \u05d3\u05e7\u05d9\u05dd, \u05e1\u05d5\u05d9\u05d4 \u05e9\u05d7\u05d5\u05e8\u05d4 \u05d0\u05d5 \u05dc\u05d1\u05e0\u05d4. \u05de\u05d0\u05d4 \u05d4\u05de\u05e1\u05e2\u05d3\u05d5\u05ea \u05e9\u05dc \u05d8\u05d0\u05d1\u05dc\u05d5\u05d2, \u05d1\u05e8 \u05e7\u05d8\u05df \u05d0\u05d7\u05d3, \u05de\u05db\u05d5\u05e0\u05ea \u05db\u05e8\u05d8\u05d9\u05e1\u05d9\u05dd, \u05d5\u05ea\u05d5\u05e8 \u05e2\u05d5\u05d3 \u05dc\u05e4\u05e0\u05d9 \u05d4\u05e4\u05ea\u05d9\u05d7\u05d4.",
+      jaSay: "the word Japanese reviewers keep using for the broth is \u4e0a\u54c1 \u2014 refined; the other repeated line is to come before noon, because the queue is worst then",
+      jaHe: "\u05d4\u05de\u05d9\u05dc\u05d4 \u05e9\u05d7\u05d5\u05d6\u05e8\u05ea \u05d1\u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea \u05d4\u05d9\u05e4\u05e0\u05d9\u05d5\u05ea \u05e2\u05dc \u05d4\u05de\u05e8\u05e7 \u05d4\u05d9\u05d0 \u4e0a\u54c1 \u2014 \u05de\u05e2\u05d5\u05d3\u05df; \u05d4\u05e9\u05d5\u05e8\u05d4 \u05d4\u05e9\u05e0\u05d9\u05d9\u05d4 \u05e9\u05d7\u05d5\u05d6\u05e8\u05ea \u05d4\u05d9\u05d0 \u05dc\u05d4\u05d2\u05d9\u05e2 \u05dc\u05e4\u05e0\u05d9 \u05d4\u05e6\u05d4\u05e8\u05d9\u05d9\u05dd, \u05db\u05d9 \u05d0\u05d6 \u05d4\u05ea\u05d5\u05e8 \u05d4\u05db\u05d9 \u05d2\u05e8\u05d5\u05e2" },
+    { n: "Gion Duck Noodles",
+      ja: "\u7947\u5712\u9d28\u305d\u3070",
+      area: "kyoto",
+      cat: "ramen",
+      at: [35.00425, 135.77675],
+      hyaku: true,
+      g: 4.4, gn: 1979,
+      en: "Duck ramen and nothing else, a minute from Gion-Shijo. Duck broth, house-made noodles, breast or thigh as you choose, and grape sansho pepper on the rim of the bowl. Opens at ten.",
+      he: "\u05e8\u05d0\u05de\u05df \u05d1\u05e8\u05d5\u05d5\u05d6 \u05d5\u05e8\u05e7 \u05d4\u05d5\u05d0, \u05d3\u05e7\u05d4 \u05de\u05d2'\u05d9\u05d0\u05d5\u05df-\u05e9\u05d9\u05d2'\u05d5. \u05e6\u05d9\u05e8 \u05d1\u05e8\u05d5\u05d5\u05d6, \u05e0\u05d5\u05d3\u05dc\u05e1 \u05de\u05ea\u05d5\u05e6\u05e8\u05ea \u05d4\u05d1\u05d9\u05ea, \u05d7\u05d6\u05d4 \u05d0\u05d5 \u05e9\u05d5\u05e7 \u05dc\u05d1\u05d7\u05d9\u05e8\u05ea\u05db\u05dd, \u05d5\u05e4\u05dc\u05e4\u05dc \u05e1\u05e0\u05e9\u05d5 \u05e2\u05dc \u05e9\u05e4\u05ea \u05d4\u05e7\u05e2\u05e8\u05d4. \u05e0\u05e4\u05ea\u05d7 \u05d1\u05e2\u05e9\u05e8.",
+      jaSay: "the most-mentioned tag is \u9d28\u8089 (duck) in 321 reviews; people describe duck fat floating on the soup and dipping the noodles in the sansho on the rim to change the taste halfway",
+      jaHe: "\u05d4\u05ea\u05d2 \u05d4\u05e0\u05e4\u05d5\u05e5 \u05d1\u05d9\u05d5\u05ea\u05e8 \u05d4\u05d5\u05d0 \u9d28\u8089 (\u05d1\u05e8\u05d5\u05d5\u05d6) \u05d1-321 \u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea; \u05de\u05ea\u05d0\u05e8\u05d9\u05dd \u05e9\u05d5\u05de\u05df \u05d1\u05e8\u05d5\u05d5\u05d6 \u05e9\u05e6\u05e3 \u05e2\u05dc \u05d4\u05de\u05e8\u05e7 \u05d5\u05d8\u05d1\u05d9\u05dc\u05ea \u05d4\u05e0\u05d5\u05d3\u05dc\u05e1 \u05d1\u05e1\u05e0\u05e9\u05d5 \u05e9\u05e2\u05dc \u05e9\u05e4\u05ea \u05d4\u05e7\u05e2\u05e8\u05d4 \u05db\u05d3\u05d9 \u05dc\u05e9\u05e0\u05d5\u05ea \u05d8\u05e2\u05dd \u05d1\u05d0\u05de\u05e6\u05e2" },
+    { n: "Honke Daiichi-Asahi",
+      ja: "\u672c\u5bb6\u7b2c\u4e00\u65ed \u672c\u5e97",
+      area: "kyoto",
+      cat: "ramen",
+      at: [34.98663, 135.76250],
+      hyaku: true,
+      g: 4.0, gn: 9273,
+      en: "The soy-broth shop by Kyoto station, open since 1947 and from 06:00 \u2014 the bowl for an arrival or departure morning. Kujo spring onion piled over pork and thin noodles.",
+      he: "\u05d1\u05d9\u05ea \u05d4\u05e8\u05d0\u05de\u05df \u05e2\u05dc \u05e6\u05d9\u05e8 \u05e1\u05d5\u05d9\u05d4 \u05dc\u05d9\u05d3 \u05ea\u05d7\u05e0\u05ea \u05e7\u05d9\u05d5\u05d8\u05d5, \u05e4\u05d5\u05e2\u05dc \u05de-1947 \u05d5\u05de\u05e9\u05e9 \u05d1\u05d1\u05d5\u05e7\u05e8 \u2014 \u05d4\u05e7\u05e2\u05e8\u05d4 \u05e9\u05dc \u05d1\u05d5\u05e7\u05e8 \u05d4\u05d2\u05e2\u05d4 \u05d0\u05d5 \u05d1\u05d5\u05e7\u05e8 \u05d9\u05e6\u05d9\u05d0\u05d4. \u05d1\u05e6\u05dc \u05d9\u05e8\u05d5\u05e7 \u05e7\u05d5\u05d2'\u05d5 \u05e2\u05dc \u05d7\u05d6\u05d9\u05e8 \u05d5\u05e0\u05d5\u05d3\u05dc\u05e1 \u05d3\u05e7\u05d9\u05dd.",
+      jaSay: "9,273 reviews, and the argument in them is about the queue, not the bowl; the advice repeated most is to use the early-morning hours",
+      jaHe: "9,273 \u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea, \u05d5\u05d4\u05de\u05d7\u05dc\u05d5\u05e7\u05ea \u05d1\u05d4\u05df \u05d4\u05d9\u05d0 \u05e2\u05dc \u05d4\u05ea\u05d5\u05e8 \u05d5\u05dc\u05d0 \u05e2\u05dc \u05d4\u05d0\u05d5\u05db\u05dc; \u05d4\u05e2\u05e6\u05d4 \u05e9\u05d7\u05d5\u05d6\u05e8\u05ea \u05d4\u05db\u05d9 \u05d4\u05e8\u05d1\u05d4 \u05d4\u05d9\u05d0 \u05dc\u05e0\u05e6\u05dc \u05d0\u05ea \u05e9\u05e2\u05d5\u05ea \u05d4\u05d1\u05d5\u05e7\u05e8 \u05d4\u05de\u05d5\u05e7\u05d3\u05de\u05d5\u05ea" },
+    { n: "Akagakiya",
+      ja: "\u8d64\u57a3\u5c4b",
+      area: "kyoto",
+      cat: "izakaya",
+      at: [35.01285, 135.77254],
+      hyaku: true,
+      g: 4.2, gn: 726,
+      en: "A 1930s izakaya by the Kamo river at Sanjo: wooden counter, oden in the pot, sake by the cup. Tabelog top 100. Cash, no English menu, and worth the pointing.",
+      he: "\u05d0\u05d9\u05d6\u05e7\u05d0\u05d9\u05d4 \u05de\u05e9\u05e0\u05d5\u05ea \u05d4-30 \u05dc\u05d9\u05d3 \u05e0\u05d4\u05e8 \u05e7\u05d0\u05de\u05d5 \u05d1\u05e1\u05d0\u05e0\u05d2'\u05d5: \u05d1\u05e8 \u05e2\u05e5, \u05d0\u05d5\u05d3\u05df \u05d1\u05e1\u05d9\u05e8, \u05e1\u05d0\u05e7\u05d4 \u05d1\u05db\u05d5\u05e1\u05d5\u05ea. \u05de\u05d0\u05d4 \u05d4\u05de\u05e1\u05e2\u05d3\u05d5\u05ea \u05e9\u05dc \u05d8\u05d0\u05d1\u05dc\u05d5\u05d2. \u05de\u05d6\u05d5\u05de\u05df, \u05d1\u05dc\u05d9 \u05ea\u05e4\u05e8\u05d9\u05d8 \u05d1\u05d0\u05e0\u05d2\u05dc\u05d9\u05ea, \u05d5\u05e9\u05d5\u05d5\u05d4 \u05d0\u05ea \u05d4\u05d4\u05e6\u05d1\u05e2\u05d4 \u05d1\u05d0\u05e6\u05d1\u05e2.",
+      jaSay: "one reviewer calls it a top-three izakaya in the country; the oden and the white-grilled eel are the two dishes named most, and \u9d28 (duck) tags 58 reviews",
+      jaHe: "\u05de\u05d1\u05e7\u05e8 \u05d0\u05d7\u05d3 \u05e7\u05d5\u05e8\u05d0 \u05dc\u05d4 \u05d0\u05d7\u05ea \u05de\u05e9\u05dc\u05d5\u05e9 \u05d4\u05d0\u05d9\u05d6\u05e7\u05d0\u05d9\u05d5\u05ea \u05d4\u05d8\u05d5\u05d1\u05d5\u05ea \u05d1\u05de\u05d3\u05d9\u05e0\u05d4; \u05d4\u05d0\u05d5\u05d3\u05df \u05d5\u05d4\u05e6\u05dc\u05d5\u05e4\u05d7 \u05d4\u05e6\u05dc\u05d5\u05d9-\u05dc\u05d1\u05df \u05d4\u05dd \u05e9\u05e0\u05d9 \u05d4\u05de\u05e0\u05d5\u05ea \u05e9\u05d7\u05d5\u05d6\u05e8\u05d5\u05ea, \u05d5-\u9d28 (\u05d1\u05e8\u05d5\u05d5\u05d6) \u05de\u05ea\u05d5\u05d9\u05d2 \u05d1-58 \u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea" },
+    { n: "Yakiniku Yazawa Kyoto",
+      ja: "\u713c\u8089\u77e2\u6fa4 \u4eac\u90fd",
+      area: "kyoto",
+      cat: "kbbq",
+      at: [35.00225, 135.76150],
+      hyaku: true,
+      g: 4.1, gn: 434,
+      en: "Kuroge wagyu grilled at the table, private rooms, black-and-wood room off Ayanokoji \u2014 the polished end of yakiniku rather than the smoky end. Tabelog top 100. Book ahead.",
+      he: "\u05d5\u05d0\u05d2\u05d9\u05d5 \u05e7\u05d5\u05e8\u05d5\u05d2\u05d4 \u05e2\u05dc \u05d4\u05d2\u05e8\u05d9\u05dc \u05d1\u05e9\u05d5\u05dc\u05d7\u05df, \u05d7\u05d3\u05e8\u05d9\u05dd \u05e4\u05e8\u05d8\u05d9\u05d9\u05dd, \u05d7\u05dc\u05dc \u05e9\u05d7\u05d5\u05e8-\u05e2\u05e5 \u05dc\u05d9\u05d3 \u05d0\u05d9\u05d9\u05d0\u05e0\u05d5\u05e7\u05d5\u05d2'\u05d9 \u2014 \u05d4\u05e7\u05e6\u05d4 \u05d4\u05de\u05d4\u05d5\u05e7\u05e6\u05e2 \u05e9\u05dc \u05d9\u05d0\u05e7\u05d9\u05e0\u05d9\u05e7\u05d5 \u05d5\u05dc\u05d0 \u05d4\u05e7\u05e6\u05d4 \u05d4\u05de\u05e2\u05d5\u05e9\u05df. \u05de\u05d0\u05d4 \u05d4\u05de\u05e1\u05e2\u05d3\u05d5\u05ea \u05e9\u05dc \u05d8\u05d0\u05d1\u05dc\u05d5\u05d2. \u05db\u05d3\u05d0\u05d9 \u05dc\u05d4\u05d6\u05de\u05d9\u05df \u05de\u05e8\u05d0\u05e9.",
+      jaSay: "reviews single out the rare cuts and the yukke; the room being quiet enough to talk in comes up as often as the meat",
+      jaHe: "\u05d4\u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea \u05de\u05d3\u05d2\u05d9\u05e9\u05d5\u05ea \u05d0\u05ea \u05d4\u05d7\u05dc\u05e7\u05d9\u05dd \u05d4\u05e0\u05d3\u05d9\u05e8\u05d9\u05dd \u05d5\u05d0\u05ea \u05d4\u05d9\u05d5\u05e7\u05d4; \u05d4\u05e9\u05e7\u05d8 \u05d1\u05d7\u05dc\u05dc \u05e9\u05de\u05d0\u05e4\u05e9\u05e8 \u05dc\u05d3\u05d1\u05e8 \u05d7\u05d5\u05d6\u05e8 \u05dc\u05d0 \u05e4\u05d7\u05d5\u05ea \u05de\u05d4\u05d1\u05e9\u05e8" },
+    { n: "Il Ghiottone",
+      ja: "\u30a4\u30eb \u30ae\u30aa\u30c3\u30c8\u30fc\u30cd \u4eac\u90fd\u672c\u5e97",
+      area: "kyoto",
+      cat: "italian",
+      at: [34.99888, 135.77925],
+      hyaku: true,
+      g: 4.3, gn: 362,
+      en: "Kyoto-Italian: Italian technique on Kyoto vegetables and fish, in a house on the slope below Yasaka pagoda. Tabelog top 100. Lunch is the affordable way in.",
+      he: "\u05d0\u05d9\u05d8\u05dc\u05e7\u05d9-\u05e7\u05d9\u05d5\u05d8\u05d5: \u05d8\u05db\u05e0\u05d9\u05e7\u05d4 \u05d0\u05d9\u05d8\u05dc\u05e7\u05d9\u05ea \u05e2\u05dc \u05d9\u05e8\u05e7\u05d5\u05ea \u05d5\u05d3\u05d2\u05d9\u05dd \u05e9\u05dc \u05e7\u05d9\u05d5\u05d8\u05d5, \u05d1\u05d1\u05d9\u05ea \u05d1\u05de\u05d3\u05e8\u05d5\u05df \u05de\u05ea\u05d7\u05ea \u05dc\u05e4\u05d2\u05d5\u05d3\u05ea \u05d9\u05d0\u05e1\u05d0\u05e7\u05d4. \u05de\u05d0\u05d4 \u05d4\u05de\u05e1\u05e2\u05d3\u05d5\u05ea \u05e9\u05dc \u05d8\u05d0\u05d1\u05dc\u05d5\u05d2. \u05d4\u05e6\u05d4\u05e8\u05d9\u05d9\u05dd \u05d4\u05dd \u05d4\u05d3\u05e8\u05da \u05d4\u05d6\u05d5\u05dc\u05d4 \u05dc\u05d4\u05d9\u05db\u05e0\u05e1.",
+      jaSay: "reviewers say the food feels \u548c\u3068\u4eac\u90fd \u2014 Japanese and specifically Kyoto \u2014 and that the seat at the near end has the five-storey pagoda in the window",
+      jaHe: "\u05d4\u05de\u05d1\u05e7\u05e8\u05d9\u05dd \u05d0\u05d5\u05de\u05e8\u05d9\u05dd \u05e9\u05d4\u05d0\u05d5\u05db\u05dc \u05de\u05e8\u05d2\u05d9\u05e9 \u548c\u3068\u4eac\u90fd \u2014 \u05d9\u05e4\u05e0\u05d9 \u05d5\u05e7\u05d9\u05d5\u05d8\u05d5\u05d0\u05d9 \u2014 \u05d5\u05e9\u05de\u05d4\u05de\u05d5\u05e9\u05d1 \u05d1\u05e7\u05e6\u05d4 \u05d4\u05e7\u05d3\u05de\u05d9 \u05e8\u05d5\u05d0\u05d9\u05dd \u05d0\u05ea \u05d4\u05e4\u05d2\u05d5\u05d3\u05d4 \u05d1\u05ea \u05d7\u05de\u05e9 \u05d4\u05e7\u05d5\u05de\u05d5\u05ea \u05d1\u05d7\u05dc\u05d5\u05df" },
+    { n: "cenci",
+      ja: "cenci",
+      area: "kyoto",
+      cat: "italian",
+      at: [35.01700, 135.78013],
+      hyaku: true,
+      g: 4.6, gn: 434,
+      en: "The highest-rated Italian in the city on both scales: a two-storey room with a quiet garden near Kumano-jinja, one Michelin star, Tabelog top 100. Reserve well ahead.",
+      he: "\u05d4\u05d0\u05d9\u05d8\u05dc\u05e7\u05d9 \u05d4\u05de\u05d3\u05d5\u05e8\u05d2 \u05d1\u05d9\u05d5\u05ea\u05e8 \u05d1\u05e2\u05d9\u05e8 \u05d1\u05e9\u05e0\u05d9 \u05d4\u05e1\u05d5\u05dc\u05de\u05d5\u05ea: \u05d7\u05dc\u05dc \u05d3\u05d5-\u05e7\u05d5\u05de\u05ea\u05d9 \u05e2\u05dd \u05d2\u05df \u05e9\u05e7\u05d8 \u05dc\u05d9\u05d3 \u05e7\u05d5\u05de\u05d0\u05e0\u05d5-\u05d2'\u05d9\u05e0\u05d2'\u05d4, \u05db\u05d5\u05db\u05d1 \u05de\u05d9\u05e9\u05dc\u05df \u05d0\u05d7\u05d3, \u05de\u05d0\u05d4 \u05d4\u05de\u05e1\u05e2\u05d3\u05d5\u05ea \u05e9\u05dc \u05d8\u05d0\u05d1\u05dc\u05d5\u05d2. \u05dc\u05d4\u05d6\u05de\u05d9\u05df \u05de\u05d5\u05e7\u05d3\u05dd.",
+      jaSay: "Japanese reviewers describe the cooking as crossing out of Italian into washoku and French, and mention the Michelin star themselves",
+      jaHe: "\u05d4\u05de\u05d1\u05e7\u05e8\u05d9\u05dd \u05d4\u05d9\u05e4\u05e0\u05d9\u05dd \u05de\u05ea\u05d0\u05e8\u05d9\u05dd \u05d1\u05d9\u05e9\u05d5\u05dc \u05e9\u05d7\u05d5\u05e8\u05d2 \u05de\u05d0\u05d9\u05d8\u05dc\u05e7\u05d9 \u05dc\u05d5\u05d5\u05d0\u05e9\u05d5\u05e7\u05d5 \u05d5\u05dc\u05e6\u05e8\u05e4\u05ea\u05d9, \u05d5\u05de\u05d6\u05db\u05d9\u05e8\u05d9\u05dd \u05d1\u05e2\u05e6\u05de\u05dd \u05d0\u05ea \u05db\u05d5\u05db\u05d1 \u05d4\u05de\u05d9\u05e9\u05dc\u05df" },
+    { n: "Inoda Coffee Honten",
+      ja: "\u30a4\u30ce\u30c0\u30b3\u30fc\u30d2 \u672c\u5e97",
+      area: "kyoto",
+      cat: "coffee",
+      at: [35.00800, 135.76313],
+      g: 4.3, gn: 5483,
+      en: "Kyoto's coffee institution, open from 07:00 in a courtyard house off Sakaimachi: dark roast, thick cups, egg-and-ham breakfast. The classic order comes with milk and sugar already in it \u2014 say so if you want it black.",
+      he: "\u05de\u05d5\u05e1\u05d3 \u05d4\u05e7\u05e4\u05d4 \u05e9\u05dc \u05e7\u05d9\u05d5\u05d8\u05d5, \u05e4\u05ea\u05d5\u05d7 \u05de-07:00 \u05d1\u05d1\u05d9\u05ea \u05e2\u05dd \u05d7\u05e6\u05e8 \u05dc\u05d9\u05d3 \u05e1\u05d0\u05e7\u05d0\u05d9\u05de\u05d0\u05e6'\u05d9: \u05e7\u05dc\u05d9\u05d9\u05d4 \u05db\u05d4\u05d4, \u05e1\u05e4\u05dc\u05d9\u05dd \u05e1\u05de\u05d9\u05db\u05d9\u05dd, \u05d0\u05e8\u05d5\u05d7\u05ea \u05d1\u05d5\u05e7\u05e8 \u05e9\u05dc \u05d7\u05d1\u05d9\u05ea\u05d4 \u05d5\u05db\u05e8\u05d9\u05da. \u05d4\u05d4\u05d6\u05de\u05e0\u05d4 \u05d4\u05e7\u05dc\u05d0\u05e1\u05d9\u05ea \u05de\u05d2\u05d9\u05e2\u05d4 \u05e2\u05dd \u05d7\u05dc\u05d1 \u05d5\u05e1\u05d5\u05db\u05e8 \u05d1\u05e4\u05e0\u05d9\u05dd \u2014 \u05d0\u05de\u05e8\u05d5 \u05d0\u05dd \u05d0\u05ea\u05dd \u05e8\u05d5\u05e6\u05d9\u05dd \u05e9\u05d7\u05d5\u05e8.",
+      jaSay: "the garden is what reviewers open with, and the seasonal Tamba-chestnut mont blanc the owner posts about is the thing being queued for this autumn",
+      jaHe: "\u05d4\u05d2\u05df \u05d4\u05d5\u05d0 \u05de\u05d4 \u05e9\u05d4\u05de\u05d1\u05e7\u05e8\u05d9\u05dd \u05e4\u05d5\u05ea\u05d7\u05d9\u05dd \u05d1\u05d5, \u05d5\u05d4\u05de\u05d5\u05df-\u05d1\u05dc\u05d0\u05df \u05de\u05e2\u05e8\u05de\u05d5\u05e0\u05d9 \u05d8\u05de\u05d1\u05d4 \u05e9\u05d4\u05d1\u05e2\u05dc\u05d9\u05dd \u05de\u05e4\u05e8\u05e1\u05dd \u05d4\u05d5\u05d0 \u05de\u05d4 \u05e9\u05e2\u05d5\u05de\u05d3\u05d9\u05dd \u05d1\u05ea\u05d5\u05e8 \u05d1\u05e9\u05d1\u05d9\u05dc\u05d5 \u05d1\u05e1\u05ea\u05d9\u05d5 \u05d4\u05d6\u05d4" },
+    { n: "Izuu",
+      ja: "\u3044\u3065\u3046",
+      area: "kyoto",
+      cat: "sushi",
+      at: [35.00485, 135.77450],
+      g: 4.2, gn: 1330,
+      en: "Not counter sushi: saba-zushi since 1781 \u2014 mackerel pressed with vinegared rice and wrapped in kombu, cut into thick rounds. Eat in at Gion or take a box away.",
+      he: "\u05dc\u05d0 \u05e1\u05d5\u05e9\u05d9 \u05d1\u05d1\u05e8: \u05e1\u05d0\u05d1\u05d4-\u05d6\u05d5\u05e9\u05d9 \u05de-1781 \u2014 \u05de\u05e7\u05e8\u05dc \u05d3\u05d7\u05d5\u05e1 \u05e2\u05dd \u05d0\u05d5\u05e8\u05d6 \u05d7\u05d5\u05de\u05e5 \u05d5\u05e2\u05d8\u05d5\u05e3 \u05d1\u05e7\u05d5\u05de\u05d1\u05d5, \u05d7\u05ea\u05d5\u05da \u05dc\u05e2\u05d9\u05d2\u05d5\u05dc\u05d9\u05dd \u05e2\u05d1\u05d9\u05dd. \u05dc\u05d0\u05db\u05d5\u05dc \u05d1\u05de\u05e7\u05d5\u05dd \u05d1\u05d2'\u05d9\u05d0\u05d5\u05df \u05d0\u05d5 \u05dc\u05e7\u05d7\u05ea \u05e7\u05d5\u05e4\u05e1\u05d4.",
+      jaSay: "Google's own summary of the reviews calls it a calm place whose speciality is whole-mackerel sushi, and that is the dish nearly every review is about",
+      jaHe: "\u05d4\u05ea\u05e7\u05e6\u05d9\u05e8 \u05e9\u05dc \u05d2\u05d5\u05d2\u05dc \u05dc\u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea \u05de\u05ea\u05d0\u05e8 \u05de\u05e7\u05d5\u05dd \u05e9\u05e7\u05d8 \u05e9\u05d4\u05de\u05e0\u05d4 \u05e9\u05dc\u05d5 \u05d4\u05d9\u05d0 \u05e1\u05d5\u05e9\u05d9 \u05de\u05e7\u05e8\u05dc \u05e9\u05dc\u05dd, \u05d5\u05d6\u05d5 \u05d4\u05de\u05e0\u05d4 \u05e9\u05db\u05de\u05e2\u05d8 \u05db\u05dc \u05d1\u05d9\u05e7\u05d5\u05e8\u05ea \u05e2\u05d5\u05e1\u05e7\u05ea \u05d1\u05d4" },
+    { n: "CENTER4 HAMBURGERS",
+      ja: "\u30bb\u30f3\u30bf\u30fc4 \u30cf\u30f3\u30d0\u30fc\u30ac\u30fc\u30ba",
+      area: "takayama",
+      cat: "burger",
+      at: [36.14106, 137.26101],
+      hyaku: true,
+      g: 4.7, gn: 1526,
+      en: "Tabelog top 100 for hamburgers, in the old town on Kami-Ichinomachi: Hida-beef patties, antique furniture, imported beer. The highest Google score of anything on this list.",
+      he: "\u05de\u05d0\u05d4 \u05d4\u05de\u05e1\u05e2\u05d3\u05d5\u05ea \u05e9\u05dc \u05d8\u05d0\u05d1\u05dc\u05d5\u05d2 \u05dc\u05d4\u05de\u05d1\u05d5\u05e8\u05d2\u05e8, \u05d1\u05e2\u05d9\u05e8 \u05d4\u05e2\u05ea\u05d9\u05e7\u05d4 \u05d1\u05e7\u05d0\u05de\u05d9-\u05d0\u05d9\u05e6'\u05d9\u05e0\u05d5\u05de\u05d0\u05e6'\u05d9: \u05e7\u05e6\u05d9\u05e6\u05d5\u05ea \u05d1\u05e9\u05e8 \u05d4\u05d9\u05d3\u05d4, \u05e8\u05d4\u05d9\u05d8\u05d9\u05dd \u05e2\u05ea\u05d9\u05e7\u05d9\u05dd, \u05d1\u05d9\u05e8\u05d4 \u05de\u05d9\u05d5\u05d1\u05d0\u05ea. \u05d4\u05d3\u05d9\u05e8\u05d5\u05d2 \u05d4\u05d2\u05d1\u05d5\u05d4 \u05d1\u05d9\u05d5\u05ea\u05e8 \u05d1\u05d2\u05d5\u05d2\u05dc \u05de\u05db\u05dc \u05de\u05d4 \u05e9\u05d1\u05e8\u05e9\u05d9\u05de\u05d4.",
+      jaSay: "the Hida-beef burger with cheese is called a little pricey but worth it, and the drinks list \u2014 American, German and Belgian beer \u2014 gets its own praise",
+      jaHe: "\u05e2\u05dc \u05d4\u05de\u05d1\u05d5\u05e8\u05d2\u05e8 \u05d1\u05e9\u05e8 \u05d4\u05d9\u05d3\u05d4 \u05e2\u05dd \u05d2\u05d1\u05d9\u05e0\u05d4 \u05d0\u05d5\u05de\u05e8\u05d9\u05dd \u05e9\u05d4\u05d5\u05d0 \u05d9\u05e7\u05e8 \u05de\u05e2\u05d8 \u05d0\u05d1\u05dc \u05e9\u05d5\u05d5\u05d4 \u05d0\u05ea \u05d6\u05d4, \u05d5\u05e8\u05e9\u05d9\u05de\u05ea \u05d4\u05e9\u05ea\u05d9\u05d9\u05d4 \u2014 \u05d1\u05d9\u05e8\u05d4 \u05d0\u05de\u05e8\u05d9\u05e7\u05d0\u05d9\u05ea, \u05d2\u05e8\u05de\u05e0\u05d9\u05ea \u05d5\u05d1\u05dc\u05d2\u05d9\u05ea \u2014 \u05de\u05e7\u05d1\u05dc\u05ea \u05e9\u05d1\u05d7 \u05d1\u05e0\u05e4\u05e8\u05d3" },
+    { n: "Kyoya",
+      ja: "\u4eac\u3084",
+      area: "takayama",
+      cat: "local",
+      at: [36.14626, 137.25899],
+      g: 4.5, gn: 1305,
+      en: "Hida cooking in a converted old house at the north end of the old town: hoba-miso grilled on a magnolia leaf, Hida beef, mountain vegetables. The dinner to walk to from the Sanmachi lanes.",
+      he: "\u05de\u05d8\u05d1\u05d7 \u05d4\u05d9\u05d3\u05d4 \u05d1\u05d1\u05d9\u05ea \u05db\u05e4\u05e8\u05d9 \u05de\u05e9\u05d5\u05e4\u05e5 \u05d1\u05e7\u05e6\u05d4 \u05d4\u05e6\u05e4\u05d5\u05e0\u05d9 \u05e9\u05dc \u05d4\u05e2\u05d9\u05e8 \u05d4\u05e2\u05ea\u05d9\u05e7\u05d4: \u05d4\u05d5\u05d1\u05d4-\u05de\u05d9\u05e1\u05d5 \u05e2\u05dc \u05e2\u05dc\u05d4 \u05de\u05d2\u05e0\u05d5\u05dc\u05d9\u05d4, \u05d1\u05e9\u05e8 \u05d4\u05d9\u05d3\u05d4, \u05d9\u05e8\u05e7\u05d5\u05ea \u05d4\u05e8. \u05d4\u05d0\u05e8\u05d5\u05d7\u05d4 \u05e9\u05d4\u05d5\u05dc\u05db\u05d9\u05dd \u05d0\u05dc\u05d9\u05d4 \u05de\u05e1\u05de\u05d8\u05d0\u05d5\u05ea \u05e1\u05d0\u05e0\u05de\u05d0\u05e6'\u05d9.",
+      jaSay: "portions come up in review after review \u2014 one says the rice bowl is ramen-bowl sized \u2014 and the service is described as being looked after by an aunt",
+      jaHe: "\u05d2\u05d5\u05d3\u05dc \u05d4\u05de\u05e0\u05d5\u05ea \u05d7\u05d5\u05d6\u05e8 \u05d1\u05d1\u05d9\u05e7\u05d5\u05e8\u05d4 \u05d0\u05d7\u05e8 \u05d1\u05d9\u05e7\u05d5\u05e8\u05d4 \u2014 \u05d0\u05d7\u05ea \u05d0\u05d5\u05de\u05e8\u05ea \u05e9\u05e7\u05e2\u05e8\u05ea \u05d4\u05d0\u05d5\u05e8\u05d6 \u05d1\u05d2\u05d5\u05d3\u05dc \u05e7\u05e2\u05e8\u05ea \u05e8\u05d0\u05de\u05df \u2014 \u05d5\u05d4\u05e9\u05d9\u05e8\u05d5\u05ea \u05de\u05ea\u05d5\u05d0\u05e8 \u05db\u05de\u05d5 \u05d3\u05d5\u05d3\u05d4 \u05e9\u05de\u05d8\u05e4\u05dc\u05ea \u05d1\u05da" },
+    { n: "Mametengu",
+      ja: "\u8c46\u5929\u72d7 \u9ad8\u5c71\u672c\u5e97",
+      area: "takayama",
+      cat: "ramen",
+      at: [36.14379, 137.25994],
+      g: 4.0, gn: 835,
+      en: "Takayama chuka-soba, the local style: thin curly noodles in a strong soy broth, chashu, negi, menma. A small plain shop on Shimo-Ichinomachi, and lunch takes twenty minutes.",
+      he: "\u05e6'\u05d5\u05e7\u05d4-\u05e1\u05d5\u05d1\u05d4 \u05e9\u05dc \u05d8\u05e7\u05d9\u05d0\u05de\u05d4, \u05d4\u05e1\u05d8\u05d9\u05d9\u05dc \u05d4\u05de\u05e7\u05d5\u05de\u05d9: \u05e0\u05d5\u05d3\u05dc\u05e1 \u05d3\u05e7\u05d9\u05dd \u05d5\u05de\u05ea\u05d5\u05dc\u05ea\u05dc\u05d9\u05dd \u05d1\u05de\u05e8\u05e7 \u05e1\u05d5\u05d9\u05d4 \u05d7\u05d6\u05e7, \u05d7\u05d6\u05d9\u05e8, \u05d1\u05e6\u05dc \u05d9\u05e8\u05d5\u05e7, \u05d1\u05de\u05d1\u05d5\u05e7 \u05db\u05d1\u05d5\u05e9. \u05d7\u05e0\u05d5\u05ea \u05e7\u05d8\u05e0\u05d4 \u05d5\u05e4\u05e9\u05d5\u05d8\u05d4 \u05d1\u05e9\u05d9\u05de\u05d5-\u05d0\u05d9\u05e6'\u05d9\u05e0\u05d5\u05de\u05d0\u05e6'\u05d9, \u05d5\u05e6\u05d4\u05e8\u05d9\u05d9\u05dd \u05dc\u05d5\u05e7\u05d7\u05d9\u05dd \u05e2\u05e9\u05e8\u05d9\u05dd \u05d3\u05e7\u05d5\u05ea.",
+      jaSay: "reviewers call it the textbook Takayama bowl and order the gyoza with it; the soy smell arriving before the bowl is mentioned more than once",
+      jaHe: "\u05d4\u05de\u05d1\u05e7\u05e8\u05d9\u05dd \u05e7\u05d5\u05e8\u05d0\u05d9\u05dd \u05dc\u05d4 \u05d4\u05e7\u05e2\u05e8\u05d4 \u05d4\u05e7\u05dc\u05d0\u05e1\u05d9\u05ea \u05e9\u05dc \u05d8\u05e7\u05d9\u05d0\u05de\u05d4 \u05d5\u05de\u05d6\u05de\u05d9\u05e0\u05d9\u05dd \u05d0\u05d9\u05ea\u05d4 \u05d2\u05d9\u05d5\u05d6\u05d4; \u05e8\u05d9\u05d7 \u05d4\u05e1\u05d5\u05d9\u05d4 \u05e9\u05de\u05d2\u05d9\u05e2 \u05dc\u05e4\u05e0\u05d9 \u05d4\u05e7\u05e2\u05e8\u05d4 \u05de\u05d5\u05d6\u05db\u05e8 \u05dc\u05d0 \u05e4\u05e2\u05dd" },
+    { n: "Otome Sushi",
+      ja: "\u4e59\u5973\u5bff\u53f8",
+      area: "kanazawa",
+      cat: "sushi",
+      at: [36.56144, 136.65169],
+      g: 4.6, gn: 377,
+      en: "Kanazawa's counter sushi, in Kikuragemachi off Katamachi: local fish from the Sea of Japan, omakase only, about a dozen seats. Reservation essential \u2014 this one you book, not walk into.",
+      he: "\u05e1\u05d5\u05e9\u05d9 \u05d1\u05e8 \u05e9\u05dc \u05e7\u05d0\u05e0\u05d0\u05d6\u05d0\u05d5\u05d5\u05d4, \u05d1\u05e7\u05d9\u05e7\u05d5\u05e8\u05d0\u05d2\u05de\u05d0\u05e6'\u05d9 \u05dc\u05d9\u05d3 \u05e7\u05d0\u05d8\u05d0\u05de\u05d0\u05e6'\u05d9: \u05d3\u05d2\u05d9\u05dd \u05de\u05e7\u05d5\u05de\u05d9\u05d9\u05dd \u05de\u05d9\u05dd \u05d9\u05e4\u05df, \u05d0\u05d5\u05de\u05e7\u05e1\u05d4 \u05d1\u05dc\u05d1\u05d3, \u05db\u05ea\u05e8\u05d9\u05e1\u05e8 \u05de\u05e7\u05d5\u05de\u05d5\u05ea. \u05d4\u05d6\u05de\u05e0\u05d4 \u05d7\u05d5\u05d1\u05d4 \u2014 \u05dc\u05db\u05d0\u05df \u05dc\u05d0 \u05e0\u05db\u05e0\u05e1\u05d9\u05dd \u05de\u05d4\u05e8\u05d7\u05d5\u05d1.",
+      jaSay: "reviews describe a master who barely speaks, even to regulars, and say the sake pairing and the small dishes are as much of it as the nigiri",
+      jaHe: "\u05d4\u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea \u05de\u05ea\u05d0\u05e8\u05d5\u05ea \u05e9\u05e3 \u05e9\u05db\u05de\u05e2\u05d8 \u05dc\u05d0 \u05de\u05d3\u05d1\u05e8, \u05d2\u05dd \u05dc\u05d0 \u05e2\u05dd \u05e7\u05d1\u05d5\u05e2\u05d9\u05dd, \u05d5\u05d0\u05d5\u05de\u05e8\u05d5\u05ea \u05e9\u05d4\u05d4\u05ea\u05d0\u05de\u05d4 \u05dc\u05e1\u05d0\u05e7\u05d4 \u05d5\u05d4\u05de\u05e0\u05d5\u05ea \u05d4\u05e7\u05d8\u05e0\u05d5\u05ea \u05d4\u05df \u05d7\u05dc\u05e7 \u05de\u05d4\u05d7\u05d5\u05d5\u05d9\u05d4 \u05db\u05de\u05d5 \u05d4\u05e0\u05d9\u05d2\u05d9\u05e8\u05d9" },
+    { n: "1/3 HAMBURGER FACTORY",
+      ja: "1/3 \u30cf\u30f3\u30d0\u30fc\u30ac\u30fc\u30d5\u30a1\u30af\u30c8\u30ea\u30fc \u91d1\u6ca2\u5e97",
+      area: "kanazawa",
+      cat: "burger",
+      at: [36.59918, 136.61223],
+      hyaku: true,
+      g: 4.5, gn: 315,
+      en: "Tabelog top 100 for hamburgers \u2014 but out at Uneda on the coast side, about 6 km from Kanazawa station, so it is a taxi or a bus, not a walk from Higashi-Chaya.",
+      he: "\u05de\u05d0\u05d4 \u05d4\u05de\u05e1\u05e2\u05d3\u05d5\u05ea \u05e9\u05dc \u05d8\u05d0\u05d1\u05dc\u05d5\u05d2 \u05dc\u05d4\u05de\u05d1\u05d5\u05e8\u05d2\u05e8 \u2014 \u05d0\u05d1\u05dc \u05d1\u05d0\u05d5\u05e0\u05d3\u05d4 \u05d1\u05e6\u05d3 \u05d4\u05d7\u05d5\u05e3, \u05db-6 \u05e7\u201d\u05de \u05de\u05ea\u05d7\u05e0\u05ea \u05e7\u05d0\u05e0\u05d0\u05d6\u05d0\u05d5\u05d5\u05d4, \u05db\u05dc\u05d5\u05de\u05e8 \u05de\u05d5\u05e0\u05d9\u05ea \u05d0\u05d5 \u05d0\u05d5\u05d8\u05d5\u05d1\u05d5\u05e1 \u05d5\u05dc\u05d0 \u05d4\u05dc\u05d9\u05db\u05d4 \u05de\u05d4\u05d9\u05d0\u05e9\u05d9-\u05e6'\u05d0\u05d9\u05d4.",
+      jaSay: "the limited-run burgers the owner posts each month are what the Japanese reviews follow; the Tabelog badge does the rest of the talking",
+      jaHe: "\u05d4\u05d4\u05de\u05d1\u05d5\u05e8\u05d2\u05e8\u05d9\u05dd \u05d1\u05de\u05d4\u05d3\u05d5\u05e8\u05d4 \u05de\u05d5\u05d2\u05d1\u05dc\u05ea \u05e9\u05d4\u05d1\u05e2\u05dc\u05d9\u05dd \u05de\u05e4\u05e8\u05e1\u05dd \u05db\u05dc \u05d7\u05d5\u05d3\u05e9 \u05d4\u05dd \u05de\u05d4 \u05e9\u05d4\u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea \u05d4\u05d9\u05e4\u05e0\u05d9\u05d5\u05ea \u05e2\u05d5\u05e7\u05d1\u05d5\u05ea \u05d0\u05d7\u05e8\u05d9\u05d5; \u05ea\u05d2 \u05d8\u05d0\u05d1\u05dc\u05d5\u05d2 \u05e2\u05d5\u05e9\u05d4 \u05d0\u05ea \u05e9\u05d0\u05e8 \u05d4\u05e2\u05d1\u05d5\u05d3\u05d4" },
+    { n: "Yabaton",
+      ja: "\u77e2\u5834\u3068\u3093 \u77e2\u5834\u753a\u672c\u5e97",
+      area: "nagoya",
+      cat: "katsu",
+      at: [35.16168, 136.90624],
+      g: 4.1, gn: 6413,
+      en: "Nagoya's miso-katsu, at the original Yabacho shop since 1947: pork cutlet under a sweet dark hatcho-miso sauce, rice and cabbage refilled free. Picture menu, no reservation, fast.",
+      he: "\u05de\u05d9\u05e1\u05d5-\u05e7\u05d0\u05e6\u05d5 \u05e9\u05dc \u05e0\u05d2\u05d5\u05d9\u05d4, \u05d1\u05e1\u05e0\u05d9\u05e3 \u05d4\u05de\u05e7\u05d5\u05e8\u05d9 \u05d1\u05d9\u05d0\u05d1\u05d0\u05e6'\u05d5 \u05de-1947: \u05e9\u05e0\u05d9\u05e6\u05dc \u05d7\u05d6\u05d9\u05e8 \u05d1\u05e8\u05d5\u05d8\u05d1 \u05de\u05d9\u05e1\u05d5 \u05d4\u05d0\u05e6'\u05d5 \u05db\u05d4\u05d4 \u05d5\u05de\u05ea\u05d5\u05e7, \u05d0\u05d5\u05e8\u05d6 \u05d5\u05db\u05e8\u05d5\u05d1 \u05d1\u05ea\u05d5\u05e1\u05e4\u05ea \u05d7\u05d9\u05e0\u05dd. \u05ea\u05e4\u05e8\u05d9\u05d8 \u05ea\u05de\u05d5\u05e0\u05d5\u05ea, \u05d1\u05dc\u05d9 \u05d4\u05d6\u05de\u05e0\u05d4, \u05de\u05d4\u05d9\u05e8.",
+      jaSay: "6,413 reviews, and the free rice-and-cabbage refills come up in them as often as the sauce; the waraji-katsu \u2014 the big one \u2014 is what people order to share",
+      jaHe: "6,413 \u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea, \u05d5\u05d4\u05d4\u05d5\u05e1\u05e4\u05d5\u05ea \u05d4\u05d7\u05d9\u05e0\u05de\u05d9\u05d5\u05ea \u05e9\u05dc \u05d0\u05d5\u05e8\u05d6 \u05d5\u05db\u05e8\u05d5\u05d1 \u05d7\u05d5\u05d6\u05e8\u05d5\u05ea \u05d1\u05d4\u05df \u05db\u05de\u05d5 \u05d4\u05e8\u05d5\u05d8\u05d1; \u05d5\u05d0\u05ea \u05d4-waraji-katsu \u05d4\u05d2\u05d3\u05d5\u05dc \u05de\u05d6\u05de\u05d9\u05e0\u05d9\u05dd \u05db\u05d3\u05d9 \u05dc\u05d7\u05dc\u05d5\u05e7" },
+    { n: "Hoto Fudo Higashi-Koiji",
+      ja: "\u307b\u3046\u3068\u3046\u4e0d\u52d5 \u6771\u604b\u8def\u5e97",
+      area: "kawaguchiko",
+      cat: "local",
+      at: [35.49105, 138.75707],
+      g: 3.7, gn: 4389,
+      en: "One dish, one building: houtou \u2014 flat wheat noodles simmered with pumpkin and vegetables in miso \u2014 served inside a white shell of a building on the road east of the lake. Cheap, filling, and the warmest thing to eat in November.",
+      he: "\u05de\u05e0\u05d4 \u05d0\u05d7\u05ea, \u05de\u05d1\u05e0\u05d4 \u05d0\u05d7\u05d3: \u05d4\u05d5\u05d8\u05d5 \u2014 \u05e0\u05d5\u05d3\u05dc\u05e1 \u05d7\u05d9\u05d8\u05d4 \u05e9\u05d8\u05d5\u05d7\u05d9\u05dd \u05de\u05d1\u05d5\u05e9\u05dc\u05d9\u05dd \u05e2\u05dd \u05d3\u05dc\u05e2\u05ea \u05d5\u05d9\u05e8\u05e7\u05d5\u05ea \u05d1\u05de\u05d9\u05e1\u05d5 \u2014 \u05d1\u05ea\u05d5\u05da \u05de\u05d1\u05e0\u05d4 \u05dc\u05d1\u05df \u05d3\u05de\u05d5\u05d9 \u05e7\u05d5\u05e0\u05db\u05d9\u05d9\u05d4 \u05d1\u05db\u05d1\u05d9\u05e9 \u05de\u05d6\u05e8\u05d7\u05d9\u05ea \u05dc\u05d0\u05d2\u05dd. \u05d6\u05d5\u05dc, \u05de\u05e9\u05d1\u05d9\u05e2, \u05d5\u05d4\u05d3\u05d1\u05e8 \u05d4\u05db\u05d9 \u05de\u05d7\u05de\u05dd \u05dc\u05e0\u05d5\u05d1\u05de\u05d1\u05e8.",
+      jaSay: "3.7 with 4,389 reviews is the lowest score on this list, and the Japanese reviews explain it: they come for the architecture and the one dish, and complain about the queue and the coach parties",
+      jaHe: "3.7 \u05e2\u05dd 4,389 \u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea \u05d4\u05d5\u05d0 \u05d4\u05d3\u05d9\u05e8\u05d5\u05d2 \u05d4\u05e0\u05de\u05d5\u05da \u05d1\u05e8\u05e9\u05d9\u05de\u05d4, \u05d5\u05d4\u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea \u05d4\u05d9\u05e4\u05e0\u05d9\u05d5\u05ea \u05de\u05e1\u05d1\u05d9\u05e8\u05d5\u05ea \u05dc\u05de\u05d4: \u05d1\u05d0\u05d9\u05dd \u05d1\u05e9\u05d1\u05d9\u05dc \u05d4\u05d0\u05e8\u05db\u05d9\u05d8\u05e7\u05d8\u05d5\u05e8\u05d4 \u05d5\u05d4\u05de\u05e0\u05d4 \u05d4\u05d0\u05d7\u05ea, \u05d5\u05de\u05ea\u05dc\u05d5\u05e0\u05e0\u05d9\u05dd \u05e2\u05dc \u05d4\u05ea\u05d5\u05e8 \u05d5\u05e2\u05dc \u05e7\u05d1\u05d5\u05e6\u05d5\u05ea \u05d4\u05d0\u05d5\u05d8\u05d5\u05d1\u05d5\u05e1\u05d9\u05dd" },
+    { n: "LAKE BAKE",
+      ja: "\u30ec\u30a4\u30af\u30d9\u30a4\u30af",
+      area: "kawaguchiko",
+      cat: "coffee",
+      at: [35.52388, 138.74738],
+      g: 4.2, gn: 1174,
+      en: "Bakery and cafe inside Oishi Park on the north shore, which is the postcard angle on Fuji: bread and cakes baked there, terrace seats facing the mountain. Opens at ten.",
+      he: "\u05de\u05d0\u05e4\u05d9\u05d9\u05d4 \u05d5\u05d1\u05d9\u05ea \u05e7\u05e4\u05d4 \u05d1\u05ea\u05d5\u05da \u05e4\u05d0\u05e8\u05e7 \u05d0\u05d5\u05d0\u05d9\u05e9\u05d9 \u05d1\u05d7\u05d5\u05e3 \u05d4\u05e6\u05e4\u05d5\u05e0\u05d9, \u05e9\u05d4\u05d5\u05d0 \u05d6\u05d5\u05d5\u05d9\u05ea \u05d4\u05d2\u05dc\u05d5\u05d9\u05d4 \u05e2\u05dc \u05e4\u05d5\u05d2'\u05d9: \u05dc\u05d7\u05dd \u05d5\u05e2\u05d5\u05d2\u05d5\u05ea \u05e9\u05e0\u05d0\u05e4\u05d9\u05dd \u05d1\u05de\u05e7\u05d5\u05dd, \u05de\u05e8\u05e4\u05e1\u05ea \u05e9\u05e4\u05d5\u05e0\u05d4 \u05dc\u05d4\u05e8. \u05e0\u05e4\u05ea\u05d7 \u05d1\u05e2\u05e9\u05e8.",
+      jaSay: "the terrace and the Fuji view are the whole story in the Japanese reviews; the bread is described as French-style and best early",
+      jaHe: "\u05d4\u05de\u05e8\u05e4\u05e1\u05ea \u05d5\u05d4\u05e0\u05d5\u05e3 \u05dc\u05e4\u05d5\u05d2'\u05d9 \u05d4\u05dd \u05db\u05dc \u05d4\u05e1\u05d9\u05e4\u05d5\u05e8 \u05d1\u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea \u05d4\u05d9\u05e4\u05e0\u05d9\u05d5\u05ea; \u05d4\u05dc\u05d7\u05dd \u05de\u05ea\u05d5\u05d0\u05e8 \u05db\u05e1\u05d8\u05d9\u05d9\u05dc \u05e6\u05e8\u05e4\u05ea\u05d9 \u05d5\u05e2\u05d3\u05d9\u05e3 \u05de\u05d5\u05e7\u05d3\u05dd" },
+    { n: "Tamura Gin-Katsu-tei",
+      ja: "\u7530\u3080\u3089\u9280\u304b\u3064\u4ead",
+      area: "hakone",
+      cat: "katsu",
+      at: [35.25060, 139.04928],
+      g: 4.1, gn: 2490,
+      en: "Gora's katsu house, and the dish is its own invention: tofu-katsu-ni \u2014 minced pork inside tofu, breaded, then simmered with egg in a clay pot at your table. Queue at lunch; take a number and walk the street.",
+      he: "\u05d1\u05d9\u05ea \u05d4\u05e7\u05d0\u05e6\u05d5 \u05e9\u05dc \u05d2\u05d5\u05e8\u05d4, \u05d5\u05d4\u05de\u05e0\u05d4 \u05d4\u05d9\u05d0 \u05d4\u05de\u05e6\u05d0\u05d4 \u05e9\u05dc\u05d5: \u05d8\u05d5\u05e4\u05d5-\u05e7\u05d0\u05e6\u05d5-\u05e0\u05d9 \u2014 \u05d7\u05d6\u05d9\u05e8 \u05d8\u05d7\u05d5\u05df \u05d1\u05ea\u05d5\u05da \u05d8\u05d5\u05e4\u05d5, \u05d1\u05e6\u05d9\u05e4\u05d5\u05d9 \u05e4\u05e8\u05d9\u05da, \u05de\u05d1\u05d5\u05e9\u05dc \u05e2\u05dd \u05d1\u05d9\u05e6\u05d4 \u05d1\u05e1\u05d9\u05e8 \u05d7\u05e8\u05e1 \u05e2\u05dc \u05d4\u05e9\u05d5\u05dc\u05d7\u05df. \u05ea\u05d5\u05e8 \u05d1\u05e6\u05d4\u05e8\u05d9\u05d9\u05dd; \u05dc\u05d5\u05e7\u05d7\u05d9\u05dd \u05de\u05e1\u05e4\u05e8 \u05d5\u05d4\u05d5\u05dc\u05db\u05d9\u05dd \u05dc\u05d8\u05d9\u05d9\u05dc.",
+      jaSay: "reviewers say to order the tofu-katsu-ni and not the plain cutlet, and that the wait is an hour at noon and nothing at two",
+      jaHe: "\u05d4\u05de\u05d1\u05e7\u05e8\u05d9\u05dd \u05d0\u05d5\u05de\u05e8\u05d9\u05dd \u05dc\u05d4\u05d6\u05de\u05d9\u05df \u05d0\u05ea \u05d4\u05d8\u05d5\u05e4\u05d5-\u05e7\u05d0\u05e6\u05d5-\u05e0\u05d9 \u05d5\u05dc\u05d0 \u05d0\u05ea \u05d4\u05e9\u05e0\u05d9\u05e6\u05dc \u05d4\u05e8\u05d2\u05d9\u05dc, \u05d5\u05e9\u05d4\u05d4\u05de\u05ea\u05e0\u05d4 \u05d4\u05d9\u05d0 \u05e9\u05e2\u05d4 \u05d1\u05e6\u05d4\u05e8\u05d9\u05d9\u05dd \u05d5\u05d0\u05e4\u05e1 \u05d1\u05e9\u05ea\u05d9\u05d9\u05dd" },
+    { n: "NARAYA CAFE",
+      ja: "NARAYA CAFE",
+      area: "hakone",
+      cat: "coffee",
+      at: [35.24228, 139.06298],
+      g: 4.4, gn: 1032,
+      en: "Built in the grounds of a closed Miyanoshita inn, next to the station: pizza, monaka, beer, tea \u2014 and a foot bath running along the outdoor seats, which is the reason to stop.",
+      he: "\u05e0\u05d1\u05e0\u05d4 \u05d1\u05e9\u05d8\u05d7 \u05e4\u05d5\u05e0\u05d3\u05e7 \u05e1\u05d2\u05d5\u05e8 \u05d1\u05de\u05d9\u05d0\u05e0\u05d5\u05e9\u05d9\u05d8\u05d4, \u05dc\u05d9\u05d3 \u05d4\u05ea\u05d7\u05e0\u05d4: \u05e4\u05d9\u05e6\u05d4, \u05de\u05d5\u05e0\u05d0\u05e7\u05d4, \u05d1\u05d9\u05e8\u05d4, \u05ea\u05d4 \u2014 \u05d5\u05d0\u05de\u05d1\u05d8 \u05e8\u05d2\u05dc\u05d9\u05d9\u05dd \u05dc\u05d0\u05d5\u05e8\u05da \u05d4\u05de\u05d5\u05e9\u05d1\u05d9\u05dd \u05d1\u05d7\u05d5\u05e5, \u05e9\u05d4\u05d5\u05d0 \u05d4\u05e1\u05d9\u05d1\u05d4 \u05dc\u05e2\u05e6\u05d5\u05e8.",
+      jaSay: "the foot bath is in nearly every review; people list the tea, the pizza, the cheese dog and the monaka and say all of it was good",
+      jaHe: "\u05d0\u05de\u05d1\u05d8 \u05d4\u05e8\u05d2\u05dc\u05d9\u05d9\u05dd \u05de\u05d5\u05e4\u05d9\u05e2 \u05db\u05de\u05e2\u05d8 \u05d1\u05db\u05dc \u05d1\u05d9\u05e7\u05d5\u05e8\u05ea; \u05de\u05e4\u05e8\u05d8\u05d9\u05dd \u05d0\u05ea \u05d4\u05ea\u05d4, \u05d4\u05e4\u05d9\u05e6\u05d4, \u05d4\u05e0\u05e7\u05e0\u05d9\u05e7\u05d9\u05d4 \u05d1\u05d2\u05d1\u05d9\u05e0\u05d4 \u05d5\u05d4\u05de\u05d5\u05e0\u05d0\u05e7\u05d4 \u05d5\u05d0\u05d5\u05de\u05e8\u05d9\u05dd \u05e9\u05d4\u05db\u05dc \u05d4\u05d9\u05d4 \u05d8\u05d5\u05d1" }
+  ];
+
+  /* The cities, in trip order, for reading the list from home. The point is a
+     hotel in each, so "what is in town" means the same thing it will mean on
+     the day. */
+  var AREAS = [
+    ["tokyo", t("Tokyo", "\u05d8\u05d5\u05e7\u05d9\u05d5")],
+    ["osaka", t("Osaka", "\u05d0\u05d5\u05e1\u05e7\u05d4")],
+    ["kyoto", t("Kyoto", "\u05e7\u05d9\u05d5\u05d8\u05d5")],
+    ["takayama", t("Takayama", "\u05d8\u05e7\u05d0\u05d9\u05d0\u05de\u05d4")],
+    ["kanazawa", t("Kanazawa", "\u05e7\u05e0\u05d0\u05d6\u05d0\u05d5\u05d5\u05d4")],
+    ["nagoya", t("Nagoya", "\u05e0\u05d2\u05d5\u05d9\u05d4")],
+    ["kawaguchiko", t("Kawaguchiko", "\u05e7\u05d0\u05d5\u05d5\u05d2\u05d5\u05e6'\u05d9\u05e7\u05d5")],
+    ["hakone", t("Hakone", "\u05d4\u05e7\u05d5\u05e0\u05d4")],
   ];
 
   var CATS = [
@@ -4888,7 +5217,9 @@
     ["kbbq", t("Korean BBQ", "\u05e2\u05dc \u05d4\u05d0\u05e9 \u05e7\u05d5\u05e8\u05d9\u05d0\u05e0\u05d9")],
     ["italian", t("Italian", "\u05d0\u05d9\u05d8\u05dc\u05e7\u05d9")],
     ["burger", t("Hamburger", "\u05d4\u05de\u05d1\u05d5\u05e8\u05d2\u05e8")],
+    ["okonomiyaki", t("Okonomiyaki", "\u05d0\u05d5\u05e7\u05d5\u05e0\u05d5\u05de\u05d9\u05d0\u05e7\u05d9")],
     ["coffee", t("Coffee & breakfast", "\u05e7\u05e4\u05d4 \u05d5\u05d1\u05d5\u05e7\u05e8")],
+    ["local", t("Local specialties", "\u05de\u05d8\u05d1\u05d7 \u05de\u05e7\u05d5\u05de\u05d9")],
   ];
 
   /* Tabelog's scale is not a five-star scale: 3.0 is ordinary, 3.5 very good,
@@ -4927,31 +5258,72 @@
     return Math.round((tab + goo) / 2);
   }
 
+  function areaLabel(key) {
+    var hit = AREAS.filter(function (a) { return a[0] === key; })[0];
+    return hit ? hit[1] : t(key, key);
+  }
+
   var eatCat = "all";
 
+  /* The fix the list was last drawn for, so a change in the settings redraws
+     the same view: a city from home, the street around us in Japan. */
+  var eatHere = null;
+
+  /* Which city the list is showing when we are not in Japan. Remembered, so
+     the app opens on the city you were reading about last night. */
+  var eatArea = "tokyo";
+  try { eatArea = localStorage.getItem("japan-eat-area") || "tokyo"; } catch (e) {}
+  if (!AREAS.some(function (a) { return a[0] === eatArea; })) eatArea = "tokyo";
+
+  /* Called with a fix while we are in Japan, and with nothing at all from home:
+     then the list is read city by city instead of by distance. */
   function renderEats(here) {
     var head = document.getElementById("eat-head");
+    var areas = document.getElementById("eat-areas");
     var chips = document.getElementById("eat-cats");
     var list = document.getElementById("eat-list");
     var foot = document.getElementById("eat-foot");
     list.textContent = "";
     chips.textContent = "";
+    areas.textContent = "";
+    eatHere = here || null;
+    head.hidden = false;
+    head.textContent = tx(UI.eTitle);
 
-    /* Only what is reachable from here. Fifteen kilometres is generous in a city
-       and about right around Fuji, where the next village is the option. */
-    var near = EATS.map(function (r) {
-      return { r: r, km: haversineKm(here.lat, here.lon, r.at[0], r.at[1]) };
-    }).filter(function (x) { return x.km <= 15; });
+    var near;
+    if (here) {
+      /* Only what is reachable from here. Fifteen kilometres is generous in a
+         city and about right around Fuji, where the next village is the
+         option. */
+      near = EATS.map(function (r) {
+        return { r: r, km: haversineKm(here.lat, here.lon, r.at[0], r.at[1]) };
+      }).filter(function (x) { return x.km <= 15; });
+      areas.hidden = true;
+    } else {
+      near = EATS.filter(function (r) { return r.area === eatArea; })
+                 .map(function (r) { return { r: r, km: null }; });
+      areas.hidden = false;
+      AREAS.forEach(function (a) {
+        var b = el("button", "eat-cat", tx(a[1]));
+        b.type = "button";
+        if (a[0] === eatArea) b.classList.add("is-on");
+        b.addEventListener("click", function () {
+          eatArea = a[0];
+          eatCat = "all";
+          try { localStorage.setItem("japan-eat-area", eatArea); } catch (e) {}
+          renderEats(null);
+        });
+        areas.appendChild(b);
+      });
+    }
 
     if (!near.length) {
-      head.hidden = true;
+      head.hidden = !!here;
       chips.hidden = true;
       foot.hidden = true;
       return;
     }
-    head.hidden = false;
     chips.hidden = false;
-    head.textContent = tx(UI.eTitle);
 
     var have = {};
     near.forEach(function (x) { have[x.r.cat] = true; });
@@ -4969,7 +5341,8 @@
     var shown = near.filter(function (x) { return eatCat === "all" || x.r.cat === eatCat; })
                     .sort(function (a, b) {
                       var d = eatRank(b.r) - eatRank(a.r);
-                      return d !== 0 ? d : a.km - b.km;
+                      if (d !== 0) return d;
+                      return a.km === null ? 0 : a.km - b.km;
                     })
                     .slice(0, eatCat === "all" ? 6 : 4);
 
@@ -4984,7 +5357,8 @@
       var li = el("li");
 
       var top = el("div", "eat-top");
-      top.appendChild(el("span", "eat-dist", distanceText(x.km)));
+      top.appendChild(el("span", "eat-dist",
+        x.km === null ? tx(areaLabel(r.area)) : distanceText(x.km)));
       top.appendChild(el("span", "eat-name", r.n));
       if (r.ja) top.appendChild(el("span", "eat-ja", r.ja));
       li.appendChild(top);
@@ -5025,13 +5399,15 @@
     });
 
     foot.hidden = false;
-    foot.textContent = tx(UI.eHours);
+    foot.textContent = here ? tx(UI.eHours) : tx(UI.eBrowse) + " " + tx(UI.eHours);
   }
 
   /* ---------- settings ---------- */
 
   function paintSettings() {
-    document.getElementById("set-btn-label").textContent = tx(UI.sTitle);
+    var setBtn = document.getElementById("set-btn");
+    setBtn.setAttribute("aria-label", tx(UI.sTitle));
+    setBtn.title = tx(UI.sTitle);
     document.getElementById("set-title").textContent = tx(UI.sTitle);
     document.getElementById("set-source-label").textContent = tx(UI.eSource);
     document.getElementById("set-source-hint").textContent = tx(UI.sSourceHint);
@@ -5045,7 +5421,7 @@
         SOURCE = pair[0];
         try { localStorage.setItem("japan-reviews", SOURCE); } catch (e) {}
         paintSettings();
-        if (nearFix) renderEats(nearFix);
+        if (!document.getElementById("near-panel").hidden) renderEats(eatHere);
       });
       row.appendChild(b);
     });
@@ -5070,10 +5446,7 @@
        tells you nothing, so say that instead of printing it. */
     if (ranked.length && ranked[0].km > 300) {
       status.textContent = tx(UI.nFar).replace("%s", distanceText(ranked[0].km));
-      ["eat-head", "eat-cats", "eat-foot"].forEach(function (id) {
-        document.getElementById(id).hidden = true;
-      });
-      document.getElementById("eat-list").textContent = "";
+      renderEats(null);
     } else {
       status.textContent = tx(UI.nFound);
       renderEats(here);
@@ -5119,8 +5492,11 @@
     document.getElementById("near-foot").hidden = true;
     document.getElementById("near-list").textContent = "";
 
+    /* No geolocation, or a refusal, still leaves the restaurant list worth
+       reading — by city rather than by distance. */
     if (!navigator.geolocation) {
       status.textContent = tx(UI.nNoSupport);
+      renderEats(null);
       return;
     }
     status.textContent = tx(UI.nAsking);
@@ -5132,6 +5508,7 @@
     }, function (err) {
       btn.removeAttribute("aria-busy");
       status.textContent = tx(err && err.code === 1 ? UI.nDenied : UI.nFailed);
+      renderEats(null);
     }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 });
   }
 
@@ -5141,29 +5518,51 @@
   applyStatic();
   paintSettings();
   refreshStaticMapLinks();
-  var langButtons = document.querySelectorAll(".lang-btn");
-  for (var lb = 0; lb < langButtons.length; lb++) {
-    langButtons[lb].addEventListener("click", function () { setLang(this.dataset.lang); });
-  }
+  document.getElementById("lang-btn").addEventListener("click", function () {
+    setLang(LANG === "he" ? "en" : "he");
+  });
+  document.getElementById("theme-btn").addEventListener("click", function () {
+    setTheme(THEME_NEXT[THEME] || "auto");
+  });
 
   document.getElementById("near-btn").addEventListener("click", nearMe);
   document.getElementById("near-close").addEventListener("click", function () {
     document.getElementById("near-panel").hidden = true;
   });
 
+  var setBack = document.getElementById("set-back");
+
+  function openSettings(open) {
+    setBack.hidden = !open;
+    /* Nothing behind a modal should scroll under the finger. */
+    document.body.style.overflow = open ? "hidden" : "";
+    if (open) document.getElementById("set-close").focus();
+    else document.getElementById("set-btn").focus();
+  }
+
   document.getElementById("set-btn").addEventListener("click", function () {
-    var panel = document.getElementById("set-panel");
-    panel.hidden = !panel.hidden;
+    openSettings(setBack.hidden);
   });
   document.getElementById("set-close").addEventListener("click", function () {
-    document.getElementById("set-panel").hidden = true;
+    openSettings(false);
+  });
+  setBack.addEventListener("click", function (ev) {
+    if (ev.target === setBack) openSettings(false);
+  });
+  document.addEventListener("keydown", function (ev) {
+    if (ev.key === "Escape" && !setBack.hidden) openSettings(false);
   });
 
-  var themeButtons = document.querySelectorAll(".theme-btn");
-  for (var tbn = 0; tbn < themeButtons.length; tbn++) {
-    themeButtons[tbn].addEventListener("click", function () { setTheme(this.dataset.themeSet); });
-  }
   applyTheme();
+
+  /* The rule under the bar appears only once it is holding on to the top, so
+     the page looks untouched until it is scrolled. */
+  var barsEl = document.querySelector(".bars");
+  function markStuck() {
+    if (barsEl) barsEl.classList.toggle("is-stuck", barsEl.getBoundingClientRect().top <= 0.5);
+  }
+  window.addEventListener("scroll", markStuck, { passive: true });
+  markStuck();
 
   hidePrivateSections();
   renderVersion();
