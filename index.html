@@ -1093,6 +1093,35 @@
   }
   .near-find a:hover { border-color: var(--accent); color: var(--accent); }
   .near-foot { margin: 12px 0 10px; color: var(--muted); font-size: var(--step--2); }
+
+  /* Where to eat: the picks, their two scores, and the chips that filter them. */
+  .eat-head { margin: 18px 0 0; font-size: var(--step-0); font-weight: 600; }
+  .eat-cats { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 2px; }
+  .eat-cat {
+    border: 1px solid var(--rule); background: none; color: inherit; cursor: pointer;
+    border-radius: 999px; padding: 5px 11px; font: inherit; font-size: var(--step--2);
+  }
+  .eat-cat:hover { border-color: var(--accent); color: var(--accent); }
+  .eat-cat.is-on { border-color: var(--accent); background: var(--accent); color: var(--paper); }
+  .eat-list { margin: 10px 0 0; padding: 0; list-style: none; }
+  .eat-list li { border-top: 1px solid var(--rule); padding: 9px 0; }
+  .eat-list li:first-child { border-top: 0; }
+  .eat-top { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .eat-name { font-weight: 600; }
+  .eat-ja { color: var(--muted); font-size: var(--step--2); }
+  .eat-dist { font-family: var(--mono); font-size: var(--step--2); color: var(--muted); }
+  .eat-scores { display: flex; gap: 10px; flex-wrap: wrap; margin: 3px 0 0; font-size: var(--step--2); }
+  .eat-score { font-family: var(--mono); }
+  .eat-score b { font-weight: 600; }
+  .eat-note { margin: 4px 0 0; font-size: var(--step--1); }
+  .eat-ja-note { margin: 2px 0 0; font-size: var(--step--2); color: var(--muted); }
+  .eat-links { display: flex; gap: 8px; margin: 5px 0 0; }
+  .eat-links a { font-size: var(--step--2); border: 1px solid var(--rule); border-radius: 999px; padding: 3px 10px; }
+  .eat-links a:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Settings. One question so far, so it reads as a question rather than a panel. */
+  .set-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; }
+  .set-hint { margin: 8px 0 0; color: var(--muted); font-size: var(--step--2); }
   #app-full { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border: 0; padding: 0; }
   .app-full-note { color: var(--muted); font-size: var(--step--2); flex: 1 1 220px; }
   [dir="rtl"] .near-dist { text-align: right; }
@@ -1121,6 +1150,10 @@
           <svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-480q33 0 56.5-23.5T560-560q0-33-23.5-56.5T480-640q-33 0-56.5 23.5T400-560q0 33 23.5 56.5T480-480Zm0 294q122-112 181-203.5T720-552q0-109-69.5-178.5T480-800q-101 0-170.5 69.5T240-552q0 71 59 162.5T480-186Zm0 106Q319-217 239.5-334.5T160-552q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 100-79.5 217.5T480-80Zm0-480Z"/></svg>
           <span data-k="nearbtn">Near me</span>
         </button>
+        <button type="button" class="near-btn" id="set-btn" style="background:none;border:1px solid var(--rule);color:inherit">
+          <svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm112-260q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Z"/></svg>
+          <span id="set-btn-label"></span>
+        </button>
       </div>
     </div>
     <div class="now" id="now" hidden>
@@ -1138,6 +1171,15 @@
       </button>
       <span class="app-full-note" id="app-full-note" data-k="appfull-note">Booking numbers and confirmations, for the four of us. Sign in once with a code sent to your email; after that it works with no signal.</span>
     </p>
+    <section class="near" id="set-panel" hidden>
+      <div class="near-head">
+        <h2 id="set-title"></h2>
+        <button type="button" class="near-close" id="set-close" aria-label="Close">&times;</button>
+      </div>
+      <p class="eat-head" id="set-source-label" style="margin-top:6px"></p>
+      <div class="set-row" id="set-source"></div>
+      <p class="set-hint" id="set-source-hint"></p>
+    </section>
     <section class="near" id="near-panel" hidden>
       <div class="near-head">
         <h2 data-k="near-title">What is near you</h2>
@@ -1145,6 +1187,10 @@
       </div>
       <p class="near-status" id="near-status" aria-live="polite"></p>
       <ol class="near-list" id="near-list"></ol>
+      <h3 class="eat-head" id="eat-head" hidden></h3>
+      <div class="eat-cats" id="eat-cats" hidden></div>
+      <ol class="eat-list" id="eat-list"></ol>
+      <p class="near-foot" id="eat-foot" hidden></p>
       <div class="near-find" id="near-find" hidden></div>
       <p class="near-foot" id="near-foot" hidden data-k="near-foot">Distances are straight lines from where the phone puts you, so the walk is longer. The list needs no signal; opening a map does.</p>
     </section>
@@ -1447,7 +1493,7 @@
      looking at" has a single answer. Android carries it as versionName and iOS
      as MARKETING_VERSION; both keep a separate build counter that only ever
      rises, because neither platform will install a build that goes backwards. */
-  var VERSION = "1.2.9";
+  var VERSION = "1.2.10";
 
   /* The private build carries every booking reference and its PIN, which together
      are enough to cancel a reservation on Booking.com without logging in. The
@@ -1612,6 +1658,24 @@
     nShop: t("shopping", "\u05e7\u05e0\u05d9\u05d5\u05ea"),
     nNov: t("Nov", "\u05d1\u05e0\u05d5\u05d1\u05f3"),
     nFood: t("Food", "\u05d0\u05d5\u05db\u05dc"),
+    /* Eating out. Tabelog is where Japan argues about restaurants, and its
+       scale is nothing like a five-star one: 3.5 is already a very good place
+       and anything from 3.8 up has a queue outside it. Google is the other half
+       of the picture — many more voices, kinder scores, every language. */
+    eTitle: t("Where to eat", "\u05d0\u05d9\u05e4\u05d4 \u05dc\u05d0\u05db\u05d5\u05dc"),
+    eAll: t("All", "\u05d4\u05db\u05d5\u05dc"),
+    eNone: t("Nothing of that kind nearby. The map buttons below search live.", "\u05d0\u05d9\u05df \u05de\u05d6\u05d4 \u05d1\u05e1\u05d1\u05d9\u05d1\u05d4. \u05db\u05e4\u05ea\u05d5\u05e8\u05d9 \u05d4\u05de\u05e4\u05d4 \u05dc\u05de\u05d8\u05d4 \u05de\u05d7\u05e4\u05e9\u05d9\u05dd \u05d1\u05e9\u05d9\u05d3\u05d5\u05e8 \u05d7\u05d9."),
+    eTab: t("Tabelog", "\u05d8\u05d0\u05d1\u05dc\u05d5\u05d2"),
+    eGoo: t("Google", "\u05d2\u05d5\u05d2\u05dc"),
+    eBoth: t("Both", "\u05e9\u05e0\u05d9\u05d4\u05dd"),
+    eSource: t("Reviews from", "\u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea \u05de\u05ea\u05d5\u05da"),
+    eOpenMap: t("Map", "\u05de\u05e4\u05d4"),
+    eVotes: t("%s reviews", "%s \u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea"),
+    eHours: t("Hours change and small places close on a whim \u2014 the map link has today's.", "\u05e9\u05e2\u05d5\u05ea \u05d4\u05e4\u05ea\u05d9\u05d7\u05d4 \u05de\u05e9\u05ea\u05e0\u05d5\u05ea \u05d5\u05de\u05e7\u05d5\u05de\u05d5\u05ea \u05e7\u05d8\u05e0\u05d9\u05dd \u05e0\u05e1\u05d2\u05e8\u05d9\u05dd \u05dc\u05e4\u05d9 \u05de\u05e6\u05d1 \u05e8\u05d5\u05d7 \u2014 \u05d1\u05e7\u05d9\u05e9\u05d5\u05e8 \u05dc\u05de\u05e4\u05d4 \u05d9\u05e9 \u05d0\u05ea \u05e9\u05dc \u05d4\u05d9\u05d5\u05dd."),
+    eJa: t("What Japanese reviewers say", "\u05de\u05d4 \u05db\u05d5\u05ea\u05d1\u05d9\u05dd \u05d4\u05de\u05d1\u05e7\u05e8\u05d9\u05dd \u05d4\u05d9\u05e4\u05e0\u05d9\u05dd"),
+    eHyaku: t("Tabelog top 100", "\u05de\u05d0\u05d4 \u05d4\u05d8\u05d5\u05d1\u05d5\u05ea \u05e9\u05dc \u05d8\u05d0\u05d1\u05dc\u05d5\u05d2"),
+    sTitle: t("Settings", "\u05d4\u05d2\u05d3\u05e8\u05d5\u05ea"),
+    sSourceHint: t("Which scores rank the restaurants, and which are shown.", "\u05dc\u05e4\u05d9 \u05d0\u05d9\u05dc\u05d5 \u05e6\u05d9\u05d5\u05e0\u05d9\u05dd \u05de\u05d3\u05d5\u05e8\u05d2\u05d5\u05ea \u05d4\u05de\u05e1\u05e2\u05d3\u05d5\u05ea, \u05d5\u05d0\u05d9\u05dc\u05d5 \u05de\u05d5\u05e6\u05d2\u05d9\u05dd."),
     nCoffee: t("Coffee", "\u05e7\u05e4\u05d4"),
     nKonbini: t("7-Eleven (ATM)", "7-Eleven (\u05db\u05e1\u05e4\u05d5\u05de\u05d8)"),
     nPharmacy: t("Pharmacy", "\u05d1\u05d9\u05ea \u05de\u05e8\u05e7\u05d7\u05ea"),
@@ -1888,6 +1952,7 @@
     renderBudget();
     renderShops();
     renderNear();
+    paintSettings();
     applyPicks();
     renderNow();
     refreshStaticMapLinks();
@@ -4658,6 +4723,334 @@
            lat + "," + lon + "&travelmode=walking";
   }
 
+  /* ---------- where to eat ----------
+
+     Neither source can be asked at the table. Tabelog has no public API, and
+     its own pages answer an automated reader with a bot check, which is a clear
+     enough answer; Google's API needs a billable key, and a key inside a page
+     anyone can download is a key anyone can spend. So the reading was done once
+     by hand, in Japanese and in English, and the answers ship inside the page —
+     which is also why this works in a valley with the data switched off.
+
+     The two sources say different things, and that is the point:
+
+       tab    the Tabelog score out of 5, where the scale is nothing like a
+              five-star one. 3.0 is ordinary, 3.5 is very good, 3.8 has a queue,
+              and there are only a few hundred places above 4.2 in the country.
+              0 when no published source gave a number.
+       hyaku  chosen for Tabelog's 百名店 — the hundred best in this category in
+              this region, as Tabelog itself ranks them. The strongest signal
+              either source offers, and it is not a number.
+       g, gn  the Google rating and how many people left one.
+
+     A place can be one, the other, or both. Both agreeing is the good case;
+     Tabelog alone usually means a Japanese room with no English menu, and
+     Google alone often means somewhere foreigners can walk into. Neither is
+     wrong, so the setting decides which one ranks the list.
+
+     yen is what dinner costs a head. A score without it is no use: the best
+     sushi in Tokyo is ¥40,000 and that is a different question from tonight. */
+  var EATS = [
+    { n: "Ginza Hachigou",
+      ja: "\u9280\u5ea7 \u516b\u4e94",
+      area: "tokyo",
+      cat: "ramen",
+      at: [35.67050, 139.77013],
+      hyaku: true,
+      g: 4.3, gn: 2152,
+      en: "Six seats, no shop sign, one bowl: thin noodles in a clear duck-and-chicken broth nearer consomm\u00e9 than ramen. Queue, or don't eat.",
+      he: "\u05e9\u05d9\u05e9\u05d4 \u05de\u05e7\u05d5\u05de\u05d5\u05ea, \u05d1\u05dc\u05d9 \u05e9\u05dc\u05d8, \u05de\u05e0\u05d4 \u05d0\u05d7\u05ea: \u05e0\u05d5\u05d3\u05dc\u05e1 \u05d3\u05e7\u05d9\u05dd \u05d1\u05de\u05e8\u05e7 \u05d1\u05e8\u05d5\u05d5\u05d6-\u05e2\u05d5\u05e3 \u05e6\u05dc\u05d5\u05dc \u05e9\u05d3\u05d5\u05de\u05d4 \u05d9\u05d5\u05ea\u05e8 \u05dc\u05e7\u05d5\u05e0\u05e1\u05d5\u05de\u05d4 \u05de\u05dc\u05e8\u05d0\u05de\u05df. \u05d0\u05d5 \u05e9\u05de\u05d7\u05db\u05d9\u05dd \u05d1\u05ea\u05d5\u05e8, \u05d0\u05d5 \u05e9\u05dc\u05d0 \u05d0\u05d5\u05db\u05dc\u05d9\u05dd." },
+    { n: "Mensho Ginzasa",
+      ja: "\u9eba\u51e6 \u9280\u7b39",
+      area: "tokyo",
+      cat: "ramen",
+      at: [35.66613, 139.76338],
+      hyaku: true,
+      g: 4.1, gn: 1016,
+      en: "Plain little shop behind Ginza, known for a sea-bream ball in the bowl and a rice course after it.",
+      he: "\u05d7\u05e0\u05d5\u05ea \u05e7\u05d8\u05e0\u05d4 \u05d5\u05e4\u05e9\u05d5\u05d8\u05d4 \u05de\u05d0\u05d7\u05d5\u05e8\u05d9 \u05d2\u05d9\u05e0\u05d6\u05d4, \u05de\u05d5\u05db\u05e8\u05ea \u05d1\u05db\u05d5\u05e4\u05ea\u05ea \u05d3\u05d2 \u05e0\u05e1\u05d9\u05db\u05d4 \u05e9\u05d1\u05e7\u05e2\u05e8\u05d4 \u05d5\u05d1\u05de\u05e0\u05ea \u05d0\u05d5\u05e8\u05d6 \u05e9\u05d0\u05d7\u05e8\u05d9\u05d4." },
+    { n: "Rokurinsha",
+      ja: "\u516d\u5398\u820e \u6771\u4eac\u30e9\u30fc\u30e1\u30f3\u30b9\u30c8\u30ea\u30fc\u30c8\u5e97",
+      area: "tokyo",
+      cat: "ramen",
+      at: [35.68120, 139.76710],
+      hyaku: true,
+      g: 4.1, gn: 5332,
+      en: "Thick dipping noodles in the basement of Tokyo Station. The queue is permanent and the location is unbeatable on a travel day.",
+      he: "\u05e6\u05d5\u05e7\u05de\u05df \u05e1\u05de\u05d9\u05da \u05d1\u05de\u05e8\u05ea\u05e3 \u05e9\u05dc \u05ea\u05d7\u05e0\u05ea \u05d8\u05d5\u05e7\u05d9\u05d5. \u05d4\u05ea\u05d5\u05e8 \u05e7\u05d1\u05d5\u05e2, \u05d5\u05d4\u05de\u05e7\u05d5\u05dd \u05d1\u05dc\u05ea\u05d9 \u05de\u05e0\u05d5\u05e6\u05d7 \u05d1\u05d9\u05d5\u05dd \u05e9\u05dc \u05e8\u05db\u05d1\u05d5\u05ea." },
+    { n: "Isehiro Kyobashi",
+      ja: "\u4f0a\u52e2\u5ee3 \u4eac\u6a4b\u672c\u5e97",
+      area: "tokyo",
+      cat: "yakitori",
+      at: [35.67838, 139.77025],
+      hyaku: true,
+      g: 4.4, gn: 1189,
+      en: "Charcoal yakitori since 1921, five minutes from the Kyobashi hotel. The grilled-chicken rice bowl at lunch is the cheap way in.",
+      he: "\u05d9\u05e7\u05d9\u05d8\u05d5\u05e8\u05d9 \u05e2\u05dc \u05d2\u05d7\u05dc\u05d9\u05dd \u05de-1921, \u05d7\u05de\u05e9 \u05d3\u05e7\u05d5\u05ea \u05de\u05d4\u05de\u05dc\u05d5\u05df \u05d1\u05e7\u05d9\u05d5\u05d1\u05d0\u05e9\u05d9. \u05e7\u05e2\u05e8\u05ea \u05d4\u05d0\u05d5\u05e8\u05d6 \u05e2\u05dd \u05d4\u05e2\u05d5\u05e3 \u05d1\u05e6\u05d4\u05e8\u05d9\u05d9\u05dd \u05d4\u05d9\u05d0 \u05d4\u05d3\u05e8\u05da \u05d4\u05d6\u05d5\u05dc\u05d4 \u05dc\u05d4\u05d9\u05db\u05e0\u05e1.",
+      jaSay: "fifteen minutes queuing outside and ten more inside; reviewers\u5355 praise the gizzard's bite and call the rice bowl refined \u2014 big eaters should ask for extra rice",
+      jaHe: "\u05d7\u05de\u05e9-\u05e2\u05e9\u05e8\u05d4 \u05d3\u05e7\u05d5\u05ea \u05ea\u05d5\u05e8 \u05d1\u05d7\u05d5\u05e5 \u05d5\u05e2\u05d5\u05d3 \u05e2\u05e9\u05e8 \u05d1\u05e4\u05e0\u05d9\u05dd; \u05de\u05e6\u05d9\u05d9\u05e0\u05d9\u05dd \u05d0\u05ea \u05d4\u05de\u05e8\u05e7\u05dd \u05e9\u05dc \u05d4\u05e7\u05d5\u05e8\u05e7\u05d1\u05df \u05d5\u05d0\u05d5\u05de\u05e8\u05d9\u05dd \u05e9\u05e7\u05e2\u05e8\u05ea \u05d4\u05d0\u05d5\u05e8\u05d6 \u05d0\u05dc\u05d2\u05e0\u05d8\u05d9\u05ea \u2014 \u05de\u05d9 \u05e9\u05d0\u05d5\u05db\u05dc \u05d4\u05e8\u05d1\u05d4 \u05e9\u05d9\u05d1\u05e7\u05e9 \u05d0\u05d5\u05e8\u05d6 \u05d1\u05ea\u05d5\u05e1\u05e4\u05ea" },
+    { n: "Sushi Hashimoto",
+      ja: "\u9ba8 \u306f\u3057\u3082\u3068",
+      area: "tokyo",
+      cat: "sushi",
+      at: [35.67288, 139.77438],
+      hyaku: true,
+      g: 4.6, gn: 211,
+      en: "Eight seats in Shintomi, ten minutes' walk from Kyobashi. Book weeks ahead or not at all; this is the splurge, not the Tuesday dinner.",
+      he: "\u05e9\u05de\u05d5\u05e0\u05d4 \u05de\u05e7\u05d5\u05de\u05d5\u05ea \u05d1\u05e9\u05d9\u05e0\u05d8\u05d5\u05de\u05d9, \u05e2\u05e9\u05e8 \u05d3\u05e7\u05d5\u05ea \u05d4\u05dc\u05d9\u05db\u05d4 \u05de\u05e7\u05d9\u05d5\u05d1\u05d0\u05e9\u05d9. \u05de\u05d6\u05de\u05d9\u05e0\u05d9\u05dd \u05e9\u05d1\u05d5\u05e2\u05d5\u05ea \u05de\u05e8\u05d0\u05e9 \u05d0\u05d5 \u05d1\u05db\u05dc\u05dc \u05dc\u05d0; \u05d6\u05d5 \u05d4\u05e4\u05d9\u05e0\u05d5\u05e7, \u05dc\u05d0 \u05d0\u05e8\u05d5\u05d7\u05ea \u05e9\u05dc\u05d9\u05e9\u05d9.",
+      jaSay: "\u201crefined nigiri and faultless sake pairings\u201d; the oily fish is where reviewers say the counter's skill shows",
+      jaHe: "\u05e2\u05dc \u05dc\u05e9\u05d5\u05df \u05d4\u05de\u05d1\u05e7\u05e8\u05d9\u05dd: \u05e0\u05d9\u05d2\u05d9\u05e8\u05d9 \u05de\u05e2\u05d5\u05d3\u05df \u05d5\u05d4\u05ea\u05d0\u05de\u05d4 \u05de\u05d5\u05e9\u05dc\u05de\u05ea \u05dc\u05e1\u05d0\u05e7\u05d4; \u05d1\u05d3\u05d2\u05d9\u05dd \u05d4\u05e9\u05de\u05e0\u05d9\u05dd \u05e0\u05d9\u05db\u05e8\u05ea \u05d4\u05de\u05d5\u05de\u05d7\u05d9\u05d5\u05ea" },
+    { n: "Sushi no Midori Ginza",
+      ja: "\u6885\u4e18 \u5bff\u53f8\u306e\u7f8e\u767b\u5229 \u9280\u5ea7\u5e97",
+      area: "tokyo",
+      cat: "sushi",
+      at: [35.67038, 139.75963],
+      g: 4.2, gn: 5698,
+      en: "Not on any Tabelog list, and five thousand people rate it anyway: big, cheap, generous sushi in the Ginza Corridor. This is the one you can walk into.",
+      he: "\u05dc\u05d0 \u05de\u05d5\u05e4\u05d9\u05e2\u05d4 \u05d1\u05d0\u05e3 \u05e8\u05e9\u05d9\u05de\u05d4 \u05e9\u05dc \u05d8\u05d0\u05d1\u05dc\u05d5\u05d2, \u05d5\u05d7\u05de\u05e9\u05ea \u05d0\u05dc\u05e4\u05d9\u05dd \u05d0\u05d9\u05e9 \u05d1\u05db\u05dc \u05d6\u05d0\u05ea \u05de\u05d3\u05e8\u05d2\u05d9\u05dd \u05d0\u05d5\u05ea\u05d4: \u05e1\u05d5\u05e9\u05d9 \u05d2\u05d3\u05d5\u05dc, \u05d6\u05d5\u05dc \u05d5\u05e0\u05d3\u05d9\u05d1 \u05d1\u05e7\u05d5\u05e8\u05d9\u05d3\u05d5\u05e8 \u05e9\u05dc \u05d2\u05d9\u05e0\u05d6\u05d4. \u05dc\u05db\u05d0\u05df \u05d0\u05e4\u05e9\u05e8 \u05e4\u05e9\u05d5\u05d8 \u05dc\u05d4\u05d9\u05db\u05e0\u05e1.",
+      jaSay: "the queue is the subject of 176 reviews; one regular got in at 1pm on a rainy Monday and says the tuna dissolves",
+      jaHe: "\u05d4\u05ea\u05d5\u05e8 \u05d4\u05d5\u05d0 \u05d4\u05e0\u05d5\u05e9\u05d0 \u05e9\u05dc 176 \u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea; \u05de\u05d1\u05e7\u05e8 \u05d0\u05d7\u05d3 \u05e0\u05db\u05e0\u05e1 \u05d1\u05d0\u05d7\u05ea \u05d1\u05e6\u05d4\u05e8\u05d9\u05d9\u05dd \u05d1\u05d9\u05d5\u05dd \u05d2\u05e9\u05d5\u05dd \u05d5\u05d0\u05d5\u05de\u05e8 \u05e9\u05d4\u05d8\u05d5\u05e0\u05d4 \u05e0\u05de\u05e1 \u05d1\u05e4\u05d4" },
+    { n: "Takeno",
+      ja: "\u591a\u3051\u4e43\u98df\u5802",
+      area: "tokyo",
+      cat: "izakaya",
+      at: [35.66450, 139.77213],
+      hyaku: true,
+      g: 4.0, gn: 645,
+      yen: "\u00a51,900 for the mixed fry",
+      en: "A back-alley diner in the Tsukiji outer market, fried oysters above all. Lunch is set meals, evening is drinking food.",
+      he: "\u05de\u05d6\u05dc\u05dc\u05d4 \u05d1\u05e1\u05de\u05d8\u05d4 \u05d1\u05e9\u05d5\u05e7 \u05d4\u05d7\u05d9\u05e6\u05d5\u05e0\u05d9 \u05e9\u05dc \u05e6\u05d5\u05e7\u05d9\u05d2'\u05d9, \u05d1\u05e2\u05d9\u05e7\u05e8 \u05e6\u05d3\u05e4\u05d5\u05ea \u05de\u05d8\u05d5\u05d2\u05e0\u05d5\u05ea. \u05d1\u05e6\u05d4\u05e8\u05d9\u05d9\u05dd \u05de\u05e0\u05d5\u05ea \u05de\u05d5\u05d2\u05e9\u05d5\u05ea, \u05d1\u05e2\u05e8\u05d1 \u05d0\u05d5\u05db\u05dc \u05dc\u05e9\u05ea\u05d9\u05d9\u05d4.",
+      jaSay: "fried oysters come up in 72 reviews; regulars rate the lunch above the dinner and call it a drinker's place",
+      jaHe: "\u05e6\u05d3\u05e4\u05d5\u05ea \u05de\u05d8\u05d5\u05d2\u05e0\u05d5\u05ea \u05de\u05d5\u05e4\u05d9\u05e2\u05d5\u05ea \u05d1-72 \u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea; \u05d4\u05e7\u05d1\u05d5\u05e2\u05d9\u05dd \u05de\u05d3\u05e8\u05d2\u05d9\u05dd \u05d0\u05ea \u05d4\u05e6\u05d4\u05e8\u05d9\u05d9\u05dd \u05de\u05e2\u05dc \u05d4\u05e2\u05e8\u05d1" },
+    { n: "Tonkatsu Hasegawa",
+      ja: "\u3068\u3093\u304b\u3064 \u306f\u305b\u5ddd \u6771\u9280\u5ea7\u5e97",
+      area: "tokyo",
+      cat: "katsu",
+      at: [35.66763, 139.76975],
+      hyaku: true,
+      g: 4.6, gn: 633,
+      yen: "\u00a52,200 for the fillet",
+      en: "Counter tonkatsu in Tsukiji, cut extra thick and fried to order. The highest-rated katsu near the hotels, and not expensive.",
+      he: "\u05d8\u05d5\u05e0\u05e7\u05d0\u05e6\u05d5 \u05d1\u05d1\u05e8 \u05d1\u05e6\u05d5\u05e7\u05d9\u05d2'\u05d9, \u05e4\u05e8\u05d5\u05e1 \u05e2\u05d1\u05d4 \u05d1\u05de\u05d9\u05d5\u05d7\u05d3 \u05d5\u05de\u05d8\u05d5\u05d2\u05df \u05d1\u05d4\u05d6\u05de\u05e0\u05d4. \u05d4\u05e7\u05d0\u05e6\u05d5 \u05d4\u05de\u05d3\u05d5\u05e8\u05d2 \u05d1\u05d9\u05d5\u05ea\u05e8 \u05dc\u05d9\u05d3 \u05d4\u05de\u05dc\u05d5\u05e0\u05d5\u05ea, \u05d5\u05dc\u05d0 \u05d9\u05e7\u05e8.",
+      jaSay: "hijiki and pickles arrive first while the cutlet fries; the thick loin and the wasabi it is served with are what reviewers come back for",
+      jaHe: "\u05de\u05e7\u05d1\u05dc\u05d9\u05dd \u05d4\u05d9\u05d2'\u05d9\u05e7\u05d9 \u05d5\u05d7\u05de\u05d5\u05e6\u05d9\u05dd \u05e8\u05d0\u05e9\u05d5\u05e0\u05d9\u05dd \u05d1\u05d6\u05de\u05df \u05e9\u05d4\u05e7\u05d0\u05e6\u05d5 \u05de\u05d8\u05d5\u05d2\u05df; \u05d7\u05d5\u05d6\u05e8\u05d9\u05dd \u05d1\u05e9\u05d1\u05d9\u05dc \u05d4\u05e8\u05d5\u05e1\u05d8\u05d1\u05d9\u05e3 \u05d4\u05e2\u05d1\u05d4 \u05d5\u05d4\u05d5\u05d5\u05e1\u05d0\u05d1\u05d9 \u05e9\u05dc\u05d9\u05d3\u05d5" },
+    { n: "Yakiniku Toka",
+      ja: "\u713c\u8089 \u71c8\u82b1",
+      area: "tokyo",
+      cat: "kbbq",
+      at: [35.68625, 139.78400],
+      hyaku: true,
+      g: 4.7, gn: 322,
+      yen: "\u00a512,000 the set course",
+      en: "Grilled beef in Ningyocho, private rooms, and one of the few places licensed to serve it raw. The nearest thing to Korean barbecue that Tabelog ranks here.",
+      he: "\u05d1\u05e9\u05e8 \u05e2\u05dc \u05d4\u05d0\u05e9 \u05d1\u05e0\u05d9\u05e0\u05d2\u05d9\u05d5\u05de\u05d0\u05e6'\u05d5, \u05d7\u05d3\u05e8\u05d9\u05dd \u05e4\u05e8\u05d8\u05d9\u05d9\u05dd, \u05d5\u05d0\u05d7\u05d3 \u05d4\u05de\u05e7\u05d5\u05de\u05d5\u05ea \u05d4\u05de\u05e2\u05d8\u05d9\u05dd \u05e2\u05dd \u05e8\u05d9\u05e9\u05d9\u05d5\u05df \u05dc\u05d4\u05d2\u05d9\u05e9 \u05d0\u05d5\u05ea\u05d5 \u05e0\u05d0. \u05d4\u05d3\u05d1\u05e8 \u05d4\u05e7\u05e8\u05d5\u05d1 \u05d1\u05d9\u05d5\u05ea\u05e8 \u05dc\u05e2\u05dc-\u05d4\u05d0\u05e9 \u05e7\u05d5\u05e8\u05d9\u05d0\u05e0\u05d9 \u05e9\u05d8\u05d0\u05d1\u05dc\u05d5\u05d2 \u05de\u05d3\u05e8\u05d2 \u05db\u05d0\u05df." },
+    { n: "Trattoria Tsukiji Paradiso",
+      ja: "\u30c8\u30e9\u30c3\u30c8\u30ea\u30a2 \u7bc9\u5730 \u30d1\u30e9\u30c7\u30a3\u30fc\u30be\uff01",
+      area: "tokyo",
+      cat: "italian",
+      at: [35.66388, 139.77088],
+      hyaku: true,
+      g: 4.1, gn: 878,
+      en: "The fish market's Italian: seafood linguine and acqua pazza from whatever came through the market that morning.",
+      he: "\u05d4\u05d0\u05d9\u05d8\u05dc\u05e7\u05d9\u05d9\u05d4 \u05e9\u05dc \u05e9\u05d5\u05e7 \u05d4\u05d3\u05d2\u05d9\u05dd: \u05dc\u05d9\u05e0\u05d2\u05d5\u05d5\u05d9\u05e0\u05d9 \u05e4\u05d9\u05e8\u05d5\u05ea \u05d9\u05dd \u05d5\u05d0\u05e7\u05d5\u05d5\u05d4 \u05e4\u05d0\u05e6\u05d4 \u05de\u05de\u05d4 \u05e9\u05e2\u05d1\u05e8 \u05d1\u05e9\u05d5\u05e7 \u05d1\u05d0\u05d5\u05ea\u05d5 \u05d1\u05d5\u05e7\u05e8.",
+      jaSay: "pescatore appears in 109 reviews; the praise is for a sauce that is shellfish stock rather than tomato",
+      jaHe: "\u05e4\u05e1\u05e7\u05d8\u05d5\u05e8\u05d4 \u05de\u05d5\u05e4\u05d9\u05e2 \u05d1-109 \u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea; \u05de\u05e9\u05d1\u05d7\u05d9\u05dd \u05e8\u05d5\u05d8\u05d1 \u05e9\u05d4\u05d5\u05d0 \u05e6\u05d9\u05e8 \u05e4\u05d9\u05e8\u05d5\u05ea \u05d9\u05dd \u05d5\u05dc\u05d0 \u05e2\u05d2\u05d1\u05e0\u05d9\u05d5\u05ea" },
+    { n: "Brozers",
+      ja: "\u30d6\u30e9\u30b6\u30fc\u30ba \u65b0\u5bcc\u753a\u5e97",
+      area: "tokyo",
+      cat: "burger",
+      at: [35.67138, 139.77238],
+      hyaku: true,
+      g: 4.2, gn: 1207,
+      en: "Australian-trained, red-fronted burger shop three minutes from the Kyobashi hotel. The Lot Burger comes with pineapple and beetroot, as it should.",
+      he: "\u05d4\u05de\u05d1\u05d5\u05e8\u05d2\u05e8\u05d9\u05d9\u05d4 \u05e2\u05dd \u05d4\u05d7\u05d6\u05d9\u05ea \u05d4\u05d0\u05d3\u05d5\u05de\u05d4, \u05e9\u05dc \u05e9\u05e3 \u05e9\u05d4\u05ea\u05de\u05d7\u05d4 \u05d1\u05d0\u05d5\u05e1\u05d8\u05e8\u05dc\u05d9\u05d4, \u05e9\u05dc\u05d5\u05e9 \u05d3\u05e7\u05d5\u05ea \u05de\u05d4\u05de\u05dc\u05d5\u05df \u05d1\u05e7\u05d9\u05d5\u05d1\u05d0\u05e9\u05d9. \u05d4\u05dc\u05d5\u05d8-\u05d1\u05d5\u05e8\u05d2\u05e8 \u05de\u05d2\u05d9\u05e2 \u05e2\u05dd \u05d0\u05e0\u05e0\u05e1 \u05d5\u05e1\u05dc\u05e7, \u05db\u05de\u05d5 \u05e9\u05e6\u05e8\u05d9\u05da.",
+      jaSay: "the double cheeseburger is described as meaty with a foreign-beef aroma; one terrace seat, and dogs allowed on it",
+      jaHe: "\u05de\u05ea\u05d0\u05e8\u05d9\u05dd \u05d0\u05ea \u05d4\u05d3\u05d0\u05d1\u05dc \u05e6'\u05d9\u05d6\u05d1\u05d5\u05e8\u05d2\u05e8 \u05db\u05d1\u05e9\u05e8\u05d9 \u05d5\u05d1\u05e2\u05dc \u05e0\u05d9\u05d7\u05d5\u05d7 \u05e9\u05dc \u05d1\u05e9\u05e8 \u05de\u05d7\u05d5\u05f4\u05dc; \u05de\u05e7\u05d5\u05dd \u05d0\u05d7\u05d3 \u05d1\u05de\u05e8\u05e4\u05e1\u05ea, \u05d5\u05db\u05dc\u05d1\u05d9\u05dd \u05de\u05d5\u05ea\u05e8\u05d9\u05dd \u05e2\u05dc\u05d9\u05d5" },
+    { n: "Tricolore",
+      ja: "\u30c8\u30ea\u30b3\u30ed\u30fc\u30eb\u672c\u5e97",
+      area: "tokyo",
+      cat: "coffee",
+      at: [35.67013, 139.76500],
+      hyaku: true,
+      g: 4.3, gn: 1602,
+      en: "Ginza's 1936 coffee house: revolving door, waistcoats, siphon coffee and apple pie. Opens at eight, which solves breakfast.",
+      he: "\u05d1\u05d9\u05ea \u05d4\u05e7\u05e4\u05d4 \u05e9\u05dc \u05d2\u05d9\u05e0\u05d6\u05d4 \u05de-1936: \u05d3\u05dc\u05ea \u05de\u05e1\u05ea\u05d5\u05d1\u05d1\u05ea, \u05de\u05dc\u05e6\u05e8\u05d9\u05dd \u05d1\u05d7\u05d6\u05d9\u05d5\u05ea, \u05e7\u05e4\u05d4 \u05e1\u05d9\u05e4\u05d5\u05df \u05d5\u05e4\u05d0\u05d9 \u05ea\u05e4\u05d5\u05d7\u05d9\u05dd. \u05e0\u05e4\u05ea\u05d7 \u05d1\u05e9\u05de\u05d5\u05e0\u05d4, \u05d5\u05d6\u05d4 \u05e4\u05d5\u05ea\u05e8 \u05d0\u05ea \u05d4\u05d1\u05d5\u05e7\u05e8.",
+      jaSay: "apple pie in 191 reviews and the revolving door in 97; the morning set is what the regulars come for",
+      jaHe: "\u05e4\u05d0\u05d9 \u05ea\u05e4\u05d5\u05d7\u05d9\u05dd \u05d1-191 \u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea \u05d5\u05d4\u05d3\u05dc\u05ea \u05d4\u05de\u05e1\u05ea\u05d5\u05d1\u05d1\u05ea \u05d1-97; \u05d4\u05e7\u05d1\u05d5\u05e2\u05d9\u05dd \u05d1\u05d0\u05d9\u05dd \u05d1\u05e9\u05d1\u05d9\u05dc \u05de\u05e0\u05ea \u05d4\u05d1\u05d5\u05e7\u05e8" }
+  ];
+
+  var CATS = [
+    ["sushi", t("Sushi", "\u05e1\u05d5\u05e9\u05d9")],
+    ["ramen", t("Ramen", "\u05e8\u05d0\u05de\u05df")],
+    ["izakaya", t("Izakaya", "\u05d0\u05d9\u05d6\u05e7\u05d0\u05d9\u05d4")],
+    ["katsu", t("Tonkatsu & tempura", "\u05d8\u05d5\u05e0\u05e7\u05d0\u05e6\u05d5 \u05d5\u05d8\u05de\u05e4\u05d5\u05e8\u05d4")],
+    ["yakitori", t("Yakitori", "\u05d9\u05e7\u05d9\u05d8\u05d5\u05e8\u05d9")],
+    ["kbbq", t("Korean BBQ", "\u05e2\u05dc \u05d4\u05d0\u05e9 \u05e7\u05d5\u05e8\u05d9\u05d0\u05e0\u05d9")],
+    ["italian", t("Italian", "\u05d0\u05d9\u05d8\u05dc\u05e7\u05d9")],
+    ["burger", t("Hamburger", "\u05d4\u05de\u05d1\u05d5\u05e8\u05d2\u05e8")],
+    ["coffee", t("Coffee & breakfast", "\u05e7\u05e4\u05d4 \u05d5\u05d1\u05d5\u05e7\u05e8")],
+  ];
+
+  /* Tabelog's scale is not a five-star scale: 3.0 is ordinary, 3.5 very good,
+     3.8 has a queue. So it is stretched over 3.0–4.3 rather than 0–5, or every
+     place worth listing would score the same. Being chosen for the 百名店 is
+     worth more than any single number, so it stands in at 88 when there is no
+     score, and lifts one that exists. */
+  function tabScore(r) {
+    var n = r.tab ? Math.max(0, Math.min(100, Math.round((r.tab - 3.0) / 1.3 * 100))) : null;
+    if (r.hyaku) return n === null ? 88 : Math.min(100, n + 12);
+    return n;
+  }
+
+  /* Google's ratings sit high and bunch up, so 3.6–4.8 is the useful range. A
+     5.0 from nine people is not evidence: confidence climbs with the count and
+     is full at two hundred. */
+  function gooScore(r) {
+    if (!r.g) return null;
+    var base = Math.max(0, Math.min(100, Math.round((r.g - 3.6) / 1.2 * 100)));
+    return Math.round(base * (0.6 + 0.4 * Math.min(1, (r.gn || 0) / 200)));
+  }
+
+  var SOURCE = "both";
+  try { SOURCE = localStorage.getItem("japan-reviews") || "both"; } catch (e) {}
+
+  /* The setting decides what "best" means. Both takes the two together; a place
+     carrying only one of the two is judged on the one it has rather than pushed
+     down for a page it never had. */
+  function eatRank(r) {
+    var tab = tabScore(r);
+    var goo = gooScore(r);
+    if (SOURCE === "tabelog") return tab === null ? -1 : tab;
+    if (SOURCE === "google") return goo === null ? -1 : goo;
+    if (tab === null) return goo === null ? -1 : goo;
+    if (goo === null) return tab;
+    return Math.round((tab + goo) / 2);
+  }
+
+  var eatCat = "all";
+
+  function renderEats(here) {
+    var head = document.getElementById("eat-head");
+    var chips = document.getElementById("eat-cats");
+    var list = document.getElementById("eat-list");
+    var foot = document.getElementById("eat-foot");
+    list.textContent = "";
+    chips.textContent = "";
+
+    /* Only what is reachable from here. Fifteen kilometres is generous in a city
+       and about right around Fuji, where the next village is the option. */
+    var near = EATS.map(function (r) {
+      return { r: r, km: haversineKm(here.lat, here.lon, r.at[0], r.at[1]) };
+    }).filter(function (x) { return x.km <= 15; });
+
+    if (!near.length) {
+      head.hidden = true;
+      chips.hidden = true;
+      foot.hidden = true;
+      return;
+    }
+    head.hidden = false;
+    chips.hidden = false;
+    head.textContent = tx(UI.eTitle);
+
+    var have = {};
+    near.forEach(function (x) { have[x.r.cat] = true; });
+
+    function chip(key, label) {
+      var b = el("button", "eat-cat", label);
+      b.type = "button";
+      if (key === eatCat) b.classList.add("is-on");
+      b.addEventListener("click", function () { eatCat = key; renderEats(here); });
+      chips.appendChild(b);
+    }
+    chip("all", tx(UI.eAll));
+    CATS.forEach(function (c) { if (have[c[0]]) chip(c[0], tx(c[1])); });
+
+    var shown = near.filter(function (x) { return eatCat === "all" || x.r.cat === eatCat; })
+                    .sort(function (a, b) {
+                      var d = eatRank(b.r) - eatRank(a.r);
+                      return d !== 0 ? d : a.km - b.km;
+                    })
+                    .slice(0, eatCat === "all" ? 6 : 4);
+
+    if (!shown.length) {
+      list.appendChild(el("li", "eat-note", tx(UI.eNone)));
+      foot.hidden = true;
+      return;
+    }
+
+    shown.forEach(function (x) {
+      var r = x.r;
+      var li = el("li");
+
+      var top = el("div", "eat-top");
+      top.appendChild(el("span", "eat-dist", distanceText(x.km)));
+      top.appendChild(el("span", "eat-name", r.n));
+      if (r.ja) top.appendChild(el("span", "eat-ja", r.ja));
+      li.appendChild(top);
+
+      var scores = el("div", "eat-scores");
+      if (SOURCE !== "google") {
+        if (r.tab) scores.appendChild(el("span", "eat-score", tx(UI.eTab) + " " + r.tab.toFixed(2)));
+        if (r.hyaku) scores.appendChild(el("span", "eat-score", tx(UI.eHyaku)));
+      }
+      if (r.g && SOURCE !== "tabelog") {
+        scores.appendChild(el("span", "eat-score",
+          tx(UI.eGoo) + " " + r.g.toFixed(1) + " \u00b7 " + tx(UI.eVotes).replace("%s", r.gn)));
+      }
+      if (r.yen) scores.appendChild(el("span", "eat-score", r.yen));
+      li.appendChild(scores);
+
+      var note = LANG === "he" && r.he ? r.he : r.en;
+      if (note) li.appendChild(el("p", "eat-note", note));
+      var said = LANG === "he" && r.jaHe ? r.jaHe : r.jaSay;
+      if (said) li.appendChild(el("p", "eat-ja-note", tx(UI.eJa) + ": " + said));
+
+      var links = el("div", "eat-links");
+      if (r.tl) {
+        var a = el("a", null, tx(UI.eTab));
+        a.href = "https://tabelog.com/" + r.tl;
+        a.target = "_blank";
+        a.rel = "noopener";
+        links.appendChild(a);
+      }
+      var m = el("a", null, tx(UI.eOpenMap));
+      m.href = mapsSearch(r.ja || r.n, r.at[0], r.at[1]);
+      m.target = "_blank";
+      m.rel = "noopener";
+      links.appendChild(m);
+      li.appendChild(links);
+
+      list.appendChild(li);
+    });
+
+    foot.hidden = false;
+    foot.textContent = tx(UI.eHours);
+  }
+
+  /* ---------- settings ---------- */
+
+  function paintSettings() {
+    document.getElementById("set-btn-label").textContent = tx(UI.sTitle);
+    document.getElementById("set-title").textContent = tx(UI.sTitle);
+    document.getElementById("set-source-label").textContent = tx(UI.eSource);
+    document.getElementById("set-source-hint").textContent = tx(UI.sSourceHint);
+    var row = document.getElementById("set-source");
+    row.textContent = "";
+    [["both", UI.eBoth], ["tabelog", UI.eTab], ["google", UI.eGoo]].forEach(function (pair) {
+      var b = el("button", "eat-cat", tx(pair[1]));
+      b.type = "button";
+      if (SOURCE === pair[0]) b.classList.add("is-on");
+      b.addEventListener("click", function () {
+        SOURCE = pair[0];
+        try { localStorage.setItem("japan-reviews", SOURCE); } catch (e) {}
+        paintSettings();
+        if (nearFix) renderEats(nearFix);
+      });
+      row.appendChild(b);
+    });
+  }
+
   function renderNear() {
     if (!nearFix) return;
     var list = document.getElementById("near-list");
@@ -4677,8 +5070,13 @@
        tells you nothing, so say that instead of printing it. */
     if (ranked.length && ranked[0].km > 300) {
       status.textContent = tx(UI.nFar).replace("%s", distanceText(ranked[0].km));
+      ["eat-head", "eat-cats", "eat-foot"].forEach(function (id) {
+        document.getElementById(id).hidden = true;
+      });
+      document.getElementById("eat-list").textContent = "";
     } else {
       status.textContent = tx(UI.nFound);
+      renderEats(here);
       ranked.slice(0, 8).forEach(function (r) {
         var li = el("li");
         var a = el("a", "near-row");
@@ -4741,6 +5139,7 @@
   /* ---------- boot ---------- */
 
   applyStatic();
+  paintSettings();
   refreshStaticMapLinks();
   var langButtons = document.querySelectorAll(".lang-btn");
   for (var lb = 0; lb < langButtons.length; lb++) {
@@ -4750,6 +5149,14 @@
   document.getElementById("near-btn").addEventListener("click", nearMe);
   document.getElementById("near-close").addEventListener("click", function () {
     document.getElementById("near-panel").hidden = true;
+  });
+
+  document.getElementById("set-btn").addEventListener("click", function () {
+    var panel = document.getElementById("set-panel");
+    panel.hidden = !panel.hidden;
+  });
+  document.getElementById("set-close").addEventListener("click", function () {
+    document.getElementById("set-panel").hidden = true;
   });
 
   var themeButtons = document.querySelectorAll(".theme-btn");
