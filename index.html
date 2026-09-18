@@ -101,7 +101,7 @@
   .wrap {
     max-width: 1140px;
     margin: 0 auto;
-    padding: 14px 24px 96px;
+    padding: calc(14px + var(--safe-top, env(safe-area-inset-top, 0px))) 24px 96px;
     display: flex;
     flex-direction: column;
     gap: 48px;
@@ -114,16 +114,21 @@
   .wrap > .bars {
     position: sticky;
     top: 0;
+    /* Pull the row up over the page's top padding, so what is above it when
+       it sticks is the row's own background rather than a strip of page. */
+    margin-top: calc(-1 * var(--safe-top, env(safe-area-inset-top, 0px)));
     z-index: 40;
     display: flex;
     align-self: stretch;
     align-items: center;
     flex-wrap: wrap;
     gap: 10px;
-    /* The app draws edge to edge, so the row has to carry the status bar's
-       height itself when the phone reports one. */
+    /* The app draws edge to edge and the row pins itself to the top of the
+       viewport, so the row itself has to carry the status bar: --safe-top is
+       set by the Android app, env() covers the iPhone, and both are nothing in
+       an ordinary browser. */
     padding: 10px 0;
-    padding-top: calc(10px + env(safe-area-inset-top, 0px));
+    padding-top: calc(10px + var(--safe-top, env(safe-area-inset-top, 0px)));
     /* Full-bleed backing, so nothing scrolls visibly behind the buttons. */
     margin-inline: -24px;
     padding-inline: 24px;
@@ -1028,7 +1033,7 @@
   .footnote { font-size: var(--step--1); color: var(--muted); max-width: 70ch; line-height: 1.6; }
 
   @media (max-width: 680px) {
-    .wrap { padding: 10px 15px 64px; gap: 36px; }
+    .wrap { padding: calc(10px + var(--safe-top, env(safe-area-inset-top, 0px))) 15px 64px; gap: 36px; }
     .bars { margin-inline: -15px; padding-inline: 15px; }
     h1 { font-size: var(--step-3); }
     .day { grid-template-columns: 1fr; }
@@ -1516,7 +1521,7 @@
      looking at" has a single answer. Android carries it as versionName and iOS
      as MARKETING_VERSION; both keep a separate build counter that only ever
      rises, because neither platform will install a build that goes backwards. */
-  var VERSION = "1.2.17";
+  var VERSION = "1.2.18";
 
   /* The private build carries every booking reference and its PIN, which together
      are enough to cancel a reservation on Booking.com without logging in. The
