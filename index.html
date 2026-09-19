@@ -1111,8 +1111,15 @@
   .eat-score b { font-weight: 600; }
   .eat-note { margin: 4px 0 0; font-size: var(--step--1); }
   .eat-ja-note { margin: 2px 0 0; font-size: var(--step--2); color: var(--muted); }
-  .eat-links { display: flex; gap: 8px; margin: 5px 0 0; }
-  .eat-links a { font-size: var(--step--2); border: 1px solid var(--rule); border-radius: 999px; padding: 3px 10px; }
+  /* Three destinations, one row: where it is, what Google's reviewers said,
+     what Tabelog says. Icons, because the names were wider than the row. */
+  .eat-links { display: flex; gap: 8px; margin: 6px 0 0; }
+  .eat-links a {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border: 1px solid var(--rule);
+    border-radius: 999px; color: var(--muted); text-decoration: none;
+  }
+  .eat-links a svg { width: 17px; height: 17px; display: block; }
   .eat-links a:hover { border-color: var(--accent); color: var(--accent); }
 
   /* Settings. One question so far, so it reads as a question rather than a panel. */
@@ -1521,7 +1528,7 @@
      looking at" has a single answer. Android carries it as versionName and iOS
      as MARKETING_VERSION; both keep a separate build counter that only ever
      rises, because neither platform will install a build that goes backwards. */
-  var VERSION = "1.2.20";
+  var VERSION = "1.2.21";
 
   /* The private build carries every booking reference and its PIN, which together
      are enough to cancel a reservation on Booking.com without logging in. The
@@ -5301,6 +5308,13 @@
     return hit ? hit[1] : t(key, key);
   }
 
+  /* The three link icons: a pin for where it is, a review card for what Google's
+     reviewers said, a bowl for the Tabelog listing. Drawn rather than borrowed,
+     since neither site's own mark is ours to use. */
+  var ICON_PIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M12 21.2c4.2-4.4 6.4-7.6 6.4-10.4A6.4 6.4 0 0 0 5.6 10.8c0 2.8 2.2 6 6.4 10.4Z"/><circle cx="12" cy="10.6" r="2.4"/></svg>';
+  var ICON_REVIEW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="m12 3.6 2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.2-4.1 5.8-.8Z"/></svg>';
+  var ICON_BOWL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.2 11.4h14.2a7.1 7.1 0 0 1-7.1 7.1h0a7.1 7.1 0 0 1-7.1-7.1Z"/><path d="M2 18.5h17"/><path d="M15.6 8.6 21.6 4M17.6 10.2 22.4 6.6"/></svg>';
+
   var eatCat = "all";
 
   /* The fix the list was last drawn for, so a change in the settings redraws
@@ -5419,18 +5433,23 @@
       if (said) li.appendChild(el("p", "eat-ja-note", tx(UI.eJa) + ": " + said));
 
       var links = el("div", "eat-links");
-      function linkTo(label, href) {
-        var a = el("a", null, label);
+      function linkTo(label, href, icon) {
+        var a = el("a");
+        a.innerHTML = icon;
         a.href = href;
         a.target = "_blank";
         a.rel = "noopener";
+        /* The icon carries no words, so the name is the label a screen reader
+           reads and the tooltip a cursor finds. */
+        a.setAttribute("aria-label", label);
+        a.title = label;
         links.appendChild(a);
       }
-      linkTo(tx(UI.eOpenMap), mapsSearch(r.ja || r.n, r.at[0], r.at[1]));
+      linkTo(tx(UI.eOpenMap), mapsSearch(r.ja || r.n, r.at[0], r.at[1]), ICON_PIN);
       var where = AREA_JA[r.area] || "";
-      linkTo(tx(UI.eGooRev), googleReviews(r.ja || r.n, where));
+      linkTo(tx(UI.eGooRev), googleReviews(r.ja || r.n, where), ICON_REVIEW);
       linkTo(tx(UI.eTabRev), r.tl ? "https://tabelog.com/" + r.tl
-                                  : tabelogSearch((r.ja || r.n) + " " + where));
+                                  : tabelogSearch((r.ja || r.n) + " " + where), ICON_BOWL);
       li.appendChild(links);
 
       list.appendChild(li);
