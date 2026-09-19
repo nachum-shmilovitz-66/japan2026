@@ -1150,6 +1150,12 @@
   }
   .set-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; }
   .set-hint { margin: 8px 0 0; color: var(--muted); font-size: var(--step--2); }
+  .set-foot {
+    margin: 20px 0 0; padding-top: 14px; border-top: 1px solid var(--rule);
+    text-align: center; color: var(--muted); font-size: var(--step--2);
+  }
+  .set-foot p { margin: 0; }
+  .set-foot p + p { margin-top: 2px; }
   #app-full { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border: 0; padding: 0; }
   .app-full-note { color: var(--muted); font-size: var(--step--2); flex: 1 1 220px; }
   [dir="rtl"] .near-dist { text-align: right; }
@@ -1201,6 +1207,12 @@
       <p class="eat-head" id="set-source-label" style="margin-top:6px"></p>
       <div class="set-row" id="set-source"></div>
       <p class="set-hint" id="set-source-hint"></p>
+      <!-- The version belongs where someone goes looking for it, not at
+           the end of a page they have to scroll. -->
+      <div class="set-foot">
+        <p id="version-line"></p>
+        <p id="by-line"></p>
+      </div>
     </section>
     </div>
     <section class="near" id="near-panel" hidden>
@@ -1404,8 +1416,6 @@
     Prices are the Booking.com totals for two guests, tax and service charge included; the dollar figures are the estimates printed on each confirmation and will move with the rate, since every property is paid in yen on arrival. Drive times assume expressway routing and no stops — add tolls and the Japanese habit of a service-area break. Nothing cancels itself: each losing reservation has to be cancelled through Booking.com or it charges as a no-show. Reservation numbers and PINs are not printed in this copy of the page — the confirmations themselves print only <code>your.booking.com</code>, so the links are assembled rather than copied; the lookup form does not take the number from the link, so tap “copy number” first and paste it in. On a phone each link opens the web lookup in a new tab — Android hands it to the Booking.com app by itself when the app is installed — and a small “in the app” link beside it asks for the app explicitly: it opens the app on its Bookings tab, where all seventeen are listed — Booking.com gives outside links no way to land on one specific booking.
   </p>
 
-  <p class="footnote" id="version-line"></p>
-
 </div>
 
 <div class="wrap guide-page" id="guide" hidden>
@@ -1528,7 +1538,7 @@
      looking at" has a single answer. Android carries it as versionName and iOS
      as MARKETING_VERSION; both keep a separate build counter that only ever
      rises, because neither platform will install a build that goes backwards. */
-  var VERSION = "1.2.21";
+  var VERSION = "1.2.23";
 
   /* The private build carries every booking reference and its PIN, which together
      are enough to cancel a reservation on Booking.com without logging in. The
@@ -1939,8 +1949,9 @@
 
   function renderVersion() {
     var n = document.getElementById("version-line");
-    if (!n) return;
-    n.textContent = tx(t("Version ", "\u05d2\u05e8\u05e1\u05d4 ")) + VERSION;
+    if (n) n.textContent = tx(t("Japan 2026", "\u05d9\u05e4\u05df 2026")) + " v" + VERSION;
+    var b = document.getElementById("by-line");
+    if (b) b.textContent = tx(t("by Shmilovitz", "\u05de\u05d0\u05ea \u05e9\u05de\u05d9\u05dc\u05d5\u05d1\u05d9\u05e5"));
   }
 
   function applyStatic() {
