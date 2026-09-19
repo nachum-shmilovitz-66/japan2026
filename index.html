@@ -1521,7 +1521,7 @@
      looking at" has a single answer. Android carries it as versionName and iOS
      as MARKETING_VERSION; both keep a separate build counter that only ever
      rises, because neither platform will install a build that goes backwards. */
-  var VERSION = "1.2.18";
+  var VERSION = "1.2.20";
 
   /* The private build carries every booking reference and its PIN, which together
      are enough to cancel a reservation on Booking.com without logging in. The
@@ -1699,6 +1699,8 @@
     eBoth: t("Both", "\u05e9\u05e0\u05d9\u05d4\u05dd"),
     eSource: t("Reviews from", "\u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea \u05de\u05ea\u05d5\u05da"),
     eOpenMap: t("Map", "\u05de\u05e4\u05d4"),
+    eGooRev: t("Google", "\u05d2\u05d5\u05d2\u05dc"),
+    eTabRev: t("Tabelog", "\u05d8\u05d0\u05d1\u05dc\u05d5\u05d2"),
     eVotes: t("%s reviews", "%s \u05d1\u05d9\u05e7\u05d5\u05e8\u05d5\u05ea"),
     eHours: t("Hours change and small places close on a whim \u2014 the map link has today's.", "\u05e9\u05e2\u05d5\u05ea \u05d4\u05e4\u05ea\u05d9\u05d7\u05d4 \u05de\u05e9\u05ea\u05e0\u05d5\u05ea \u05d5\u05de\u05e7\u05d5\u05de\u05d5\u05ea \u05e7\u05d8\u05e0\u05d9\u05dd \u05e0\u05e1\u05d2\u05e8\u05d9\u05dd \u05dc\u05e4\u05d9 \u05de\u05e6\u05d1 \u05e8\u05d5\u05d7 \u2014 \u05d1\u05e7\u05d9\u05e9\u05d5\u05e8 \u05dc\u05de\u05e4\u05d4 \u05d9\u05e9 \u05d0\u05ea \u05e9\u05dc \u05d4\u05d9\u05d5\u05dd."),
     eJa: t("What Japanese reviewers say", "\u05de\u05d4 \u05db\u05d5\u05ea\u05d1\u05d9\u05dd \u05d4\u05de\u05d1\u05e7\u05e8\u05d9\u05dd \u05d4\u05d9\u05e4\u05e0\u05d9\u05dd"),
@@ -4738,6 +4740,21 @@
            "/@" + lat + "," + lon + ",16z";
   }
 
+  /* The reviews rather than the pin: a search for the shop by its Japanese
+     name brings up Google's own card, which opens on the reviews. The map link
+     beside it is for getting there. */
+  function googleReviews(term, city) {
+    return "https://www.google.com/search?q=" +
+           encodeURIComponent((term + " " + city).trim() + " \u30af\u30c1\u30b3\u30df");
+  }
+
+  /* Tabelog has no per-shop address we hold, and no API to ask for one, so the
+     link is its own search sorted by rating, where the shop is the first hit.
+     /rst/rstsearch/ is the form that keeps the keyword through the redirect. */
+  function tabelogSearch(term) {
+    return "https://tabelog.com/rst/rstsearch/?SrtT=rt&sk=" + encodeURIComponent(term);
+  }
+
   function walkTo(lat, lon) {
     return "https://www.google.com/maps/dir/?api=1&destination=" +
            lat + "," + lon + "&travelmode=walking";
@@ -5266,6 +5283,19 @@
     return Math.round((tab + goo) / 2);
   }
 
+  /* Both searches are Japanese searches, so the city that narrows them has to
+     be Japanese too, whatever language the page is being read in. */
+  var AREA_JA = {
+    tokyo: "\u6771\u4eac",
+    osaka: "\u5927\u962a",
+    kyoto: "\u4eac\u90fd",
+    takayama: "\u9ad8\u5c71",
+    kanazawa: "\u91d1\u6ca2",
+    nagoya: "\u540d\u53e4\u5c4b",
+    kawaguchiko: "\u6cb3\u53e3\u6e56",
+    hakone: "\u7bb1\u6839"
+  };
+
   function areaLabel(key) {
     var hit = AREAS.filter(function (a) { return a[0] === key; })[0];
     return hit ? hit[1] : t(key, key);
@@ -5389,18 +5419,18 @@
       if (said) li.appendChild(el("p", "eat-ja-note", tx(UI.eJa) + ": " + said));
 
       var links = el("div", "eat-links");
-      if (r.tl) {
-        var a = el("a", null, tx(UI.eTab));
-        a.href = "https://tabelog.com/" + r.tl;
+      function linkTo(label, href) {
+        var a = el("a", null, label);
+        a.href = href;
         a.target = "_blank";
         a.rel = "noopener";
         links.appendChild(a);
       }
-      var m = el("a", null, tx(UI.eOpenMap));
-      m.href = mapsSearch(r.ja || r.n, r.at[0], r.at[1]);
-      m.target = "_blank";
-      m.rel = "noopener";
-      links.appendChild(m);
+      linkTo(tx(UI.eOpenMap), mapsSearch(r.ja || r.n, r.at[0], r.at[1]));
+      var where = AREA_JA[r.area] || "";
+      linkTo(tx(UI.eGooRev), googleReviews(r.ja || r.n, where));
+      linkTo(tx(UI.eTabRev), r.tl ? "https://tabelog.com/" + r.tl
+                                  : tabelogSearch((r.ja || r.n) + " " + where));
       li.appendChild(links);
 
       list.appendChild(li);
