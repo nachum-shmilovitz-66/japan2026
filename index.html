@@ -1538,7 +1538,7 @@
      looking at" has a single answer. Android carries it as versionName and iOS
      as MARKETING_VERSION; both keep a separate build counter that only ever
      rises, because neither platform will install a build that goes backwards. */
-  var VERSION = "1.2.24";
+  var VERSION = "1.2.28";
 
   /* The private build carries every booking reference and its PIN, which together
      are enough to cancel a reservation on Booking.com without logging in. The
@@ -4767,10 +4767,22 @@
   }
 
   /* Tabelog has no per-shop address we hold, and no API to ask for one, so the
-     link is its own search sorted by rating, where the shop is the first hit.
-     /rst/rstsearch/ is the form that keeps the keyword through the redirect. */
-  function tabelogSearch(term) {
-    return "https://tabelog.com/rst/rstsearch/?SrtT=rt&sk=" + encodeURIComponent(term);
+     link is its own search, where the shop is the first hit.
+
+     It goes to the English site. Tabelog runs two: s.tabelog.com in Japanese,
+     s.tabelog.com/en in English, each with its own search — and its own
+     keyword field. The English one is "sw"; the Japanese "sk" is ignored
+     there, which is why /en/ with sk came back with a generic list of Tokyo
+     restaurants. The query itself stays Japanese, the shop's own name and its
+     city: the English index matches it and answers in English, so
+     sw=\u713c\u8089 \u71c8\u82b1 \u6771\u4eac returns Yakiniku Toka first.
+
+     The earlier /rst/rstsearch/?sk= redirected to the Japanese home page and
+     dropped the search on the way, which is why every icon opened the same
+     front page with an empty search box. */
+  function tabelogSearch(term, city) {
+    return "https://s.tabelog.com/en/rstLst/?sw="
+         + encodeURIComponent((term + " " + (city || "")).trim());
   }
 
   function walkTo(lat, lon) {
@@ -5459,8 +5471,8 @@
       linkTo(tx(UI.eOpenMap), mapsSearch(r.ja || r.n, r.at[0], r.at[1]), ICON_PIN);
       var where = AREA_JA[r.area] || "";
       linkTo(tx(UI.eGooRev), googleReviews(r.ja || r.n, where), ICON_REVIEW);
-      linkTo(tx(UI.eTabRev), r.tl ? "https://tabelog.com/" + r.tl
-                                  : tabelogSearch((r.ja || r.n) + " " + where), ICON_BOWL);
+      linkTo(tx(UI.eTabRev), r.tl ? "https://s.tabelog.com/en/" + r.tl
+                                  : tabelogSearch(r.ja || r.n, where), ICON_BOWL);
       li.appendChild(links);
 
       list.appendChild(li);
